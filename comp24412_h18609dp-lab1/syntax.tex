@@ -1,0 +1,14 @@
+\documentclass{standalone}
+\usepackage{sourcecodepro}
+\usepackage{forest}
+\begin{document}
+\ttfamily\footnotesize
+\catcode`\~=12
+\catcode`\|=13\let|\textbar
+\catcode`\<=13\let<\textless
+\catcode`\>=13\let>\textgreater
+\forestset{default preamble={for tree={grow'=north}}}
+\begin{forest}
+[{19.\$false}[{18.happy(giles)}[{17.loves(giles,money)}[{14.~rich(X0)|loves(X0,money)}][{15.rich(giles)}]][{13.~loves(X0,X1)|happy(X0)}]][{16.~happy(giles)}]]
+\end{forest}
+\end{document}

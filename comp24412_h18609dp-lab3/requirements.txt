@@ -1,0 +1,6 @@
+git+https://github.com/yuce/pyswip@master#egg=pyswip
+pytest
+scipy
+click
+networkx
+tabulate

@@ -1,0 +1,48 @@
+{
+	"vampire_run": {
+	"-ep": "RSTC",
+	"-fde": "none",
+	"-nm": 0,
+	"-updr": "off",
+	"-s": 1,
+	"-awr": "1:1",
+	"-av": "off",
+	"-sa": "discount",
+	"-bs": "off",
+	"-bsr": "off",
+	"-fs": "off",
+	"-fsr": "off",
+	"--bad_option": "off",
+	"--input_syntax": "tptp"
+	},
+	"formulas": {
+	"loves(X0,sK0(X0))|~happy(X0)": 12,
+	"~loves(X0,X1)|happy(X0)": 13,
+	"~rich(X0)|loves(X0,money)": 14,
+	"rich(giles)": 15,
+	"~happy(giles)": 16,
+	"loves(giles,money)": 17,
+	"happy(giles)": 18,
+	"$false": 19,
+	"loves(giles,sK0(giles))": 20
+	},
+	"proof": [
+	19,
+	[18,
+	[17, [14], [15]],
+	[13]
+	],
+	[16]
+	],
+	"resolution": {
+	"active": [16, 15, 13, 14],
+	"passive": [12],
+	"unprocessed": [17],
+	"premises": [14, 15],
+	"conclusion": 17,
+	"mgu": [
+	{"X0": "giles"},
+	{}
+	]
+	}
+}

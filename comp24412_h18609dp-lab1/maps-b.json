@@ -1,0 +1,150 @@
+{
+	"vampire_run": {
+	"-ep": "off",
+	"-fde": "none",
+	"-nm": 0,
+	"-updr": "off",
+	"-s": 0,
+	"-awr": "10:1",
+	"-av": "off",
+	"-sa": "discount",
+	"-bs": "off",
+	"-bsr": "off",
+	"-fs": "off",
+	"-fsr": "off",
+	"--bad_option": "off",
+	"--input_syntax": "tptp"
+	},
+	"formulas": {
+	"X1 = X2 | ~map(X0,X2) | ~map(X0,X1)": 13,
+	"map(sK0,sK2) | map(sK0,sK1)": 14,
+	"map(sK3,sK2) | map(sK0,sK1)": 15,
+	"map(sK3,sK1) | map(sK0,sK1)": 16,
+	"~map(X3,sK1) | ~map(X3,X2) | ~map(sK0,X2) | ~map(sK0,sK1)": 17,
+	"sK2 = X0 | ~map(sK3,X0) | map(sK0,sK1)": 22,
+	"~map(sK0,sK1) | ~map(sK0,sK1) | ~map(sK0,sK1) | map(sK3,sK1)": 35,
+	"~map(sK0,sK1) | ~map(sK0,sK1) | ~map(sK0,sK1) | map(sK0,sK2)": 37,
+	"~map(sK0,sK1) | map(sK0,sK2)": 51,
+	"~map(sK0,sK1) | map(sK3,sK1)": 53,
+	"map(sK0,sK2) | map(sK0,sK2)": 60,
+	"map(sK0,sK2)": 67,
+	"~map(sK0,sK1) | ~map(sK3,sK1) | ~map(sK0,sK1) | ~map(sK0,sK1)": 80,
+	"~map(sK0,sK1) | ~map(sK3,sK1)": 83,
+	"sK1 = sK2 | map(sK0,sK1) | map(sK0,sK1)": 237,
+	"sK1 = sK2 | map(sK0,sK1)": 272,
+	"~map(sK0,sK1) | ~map(sK0,sK1)": 1881,
+	"~map(sK0,sK1)": 1921,
+	"map(sK0,sK1) | map(sK0,sK1)": 2089,
+	"map(sK0,sK1)": 2104,
+	"$false": 23978
+	},
+	"proof": [
+	23978, 
+		[2104, 
+			[2089, 
+				[67, 
+					[60, 
+						[51, 
+							[37, 
+								[17], 
+								[14]]], 
+						[14]]], 
+				[272, 
+					[237, 
+						[22, 
+							[13], 
+							[15]], 
+						[16]]]]], 
+		[1921, 
+			[1881, 
+				[83, 
+					[80, 
+						[53, 
+							[35, 
+								[17], 
+								[16]]], 
+						[17]]], 
+				[53, 
+					[35, 
+						[17], 
+						[16]]]]]
+	],
+	"resolution": [{
+	"premises": [13, 15],
+	"conclusion": 22,
+	"mgu": [
+	{"X0": "sK3"}, {"X1": "sK2"}
+	]
+	}, {
+	"premises": [17, 16],
+	"conclusion": 35,
+	"mgu": [
+	{"X2": "sK1"}, {"X3": "sK0"}
+	]
+	}, {
+	"premises": [17, 14],
+	"conclusion": 37,
+	"mgu": [
+	{"X2": "sK1"}, {"X3": "sK0"}
+	]
+	}, {
+	"premises": [51, 14],
+	"conclusion": 60,
+	"mgu": [
+	{}
+	]
+	}, {
+	"premises": [53, 17],
+	"conclusion": 80,
+	"mgu": [
+	{"X2": "sK1"}, {"X3": "sK3"}
+	]
+	}, {
+	"premises": [22, 16],
+	"conclusion": 237,
+	"mgu": [
+	{"X0": "sK1"}
+	]
+	}, {
+	"premises": [83, 53],
+	"conclusion": 1881,
+	"mgu": [
+	{}
+	]
+	}, {
+	"premises": [2104, 1921],
+	"conclusion": 23978,
+	"mgu": [
+	{}
+	]
+	}
+	],
+	"duplicate literal removal": [
+	{
+	"premises": 37,
+	"conclusion": 51 
+	}, {
+	"premises": 35,
+	"conclusion": 53
+	}, {
+	"premises": 60,
+	"conclusion": 67
+	}, {
+	"premises": 80,
+	"conclusion": 83
+	}, {
+	"premises": 237,
+	"conclusion": 272
+	}, {
+	"premises": 1881,
+	"conclusion": 1921
+	}, {
+	"premises": 2089,
+	"conclusion": 2104
+	}
+	],
+	"superposition": {
+	"premises": [67, 272],
+	"conclusion": 2089
+	}
+}

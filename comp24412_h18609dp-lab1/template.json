@@ -1,0 +1,16 @@
+{
+	"vampire_run": {
+		"--bad_option": "off",
+		"--input_syntax": "tptp"
+	},
+	"formulas": {},
+	"proof": [],
+	"resolution": {
+		"active": [],
+		"passive": [],
+		"unprocessed": [],
+		"premises": [],
+		"conclusion": 0,
+		"mgu": [{}, {}]
+	}
+}

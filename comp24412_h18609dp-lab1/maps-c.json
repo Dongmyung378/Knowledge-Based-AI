@@ -1,0 +1,249 @@
+{
+	"vampire_run": {
+	"-ep": "off",
+	"-fde": "none",
+	"-nm": 0,
+	"-updr": "off",
+	"-s": 3,
+	"-awr": "10:1",
+	"-av": "off",
+	"-sa": "discount",
+	"-bs": "off",
+	"-bsr": "off",
+	"-fs": "off",
+	"-fsr": "off",
+	"--bad_option": "off",
+	"--input_syntax": "tptp"
+	},
+	"formulas": {
+	"~map(X0,X2) | X1 = X2 | ~map(X0,X1)": 13,
+	"map(sK0,sK2) | map(sK0,sK1)": 14,
+	"map(sK3,sK2) | map(sK0,sK1)": 15,
+	"map(sK3,sK1) | map(sK0,sK1)": 16,
+	"~map(sK0,sK1) | ~map(X3,X2) | ~map(sK0,X2) | ~map(X3,sK1)": 17,
+	"~map(sK3,X0) | sK2 = X0 | map(sK0,sK1)": 19,
+	"~map(sK3,X0) | sK1 = X0 | map(sK0,sK1)": 20,
+	"sK1 = sK2 | map(sK0,sK1) | map(sK0,sK1)": 24,
+	"map(sK0,sK1) | sK1 = sK2": 25,
+	"sK1 = sK2 | map(sK0,sK1) | map(sK0,sK1)": 27,
+	"map(sK0,sK1) | sK1 = sK2": 30,
+	"~map(sK0,X1) | ~map(X0,X1) | sK1 = sK2 | ~map(X0,sK1)": 31,
+	"~map(sK0,X0) | sK1 = X0 | sK1 = sK2": 37,
+	"sK1 = sK2 | sK1 = sK2 | map(sK0,sK1)": 63,
+	"map(sK0,sK1) | sK1 = sK2": 74,
+	"~map(X0,sK1) | sK1 = sK2 | ~map(X0,sK1) | sK1 = sK2": 80,
+	"~map(X0,sK1) | sK1 = sK2": 81,
+	"sK1 = sK2 | sK1 = sK2": 141,
+	"sK1 = sK2": 142,
+	"map(sK0,sK1) | map(sK0,sK1)": 184,
+	"map(sK0,sK1)": 188,
+	"~map(sK0,X1) | ~map(X0,X1) | ~map(X0,sK1)": 189,
+	"~map(X0,sK1) | ~map(X0,sK1)": 200,
+	"~map(X0,sK1)": 201,
+	"$false": 208
+	},
+	"proof": [
+	208, 
+		[201, 
+			[200, 
+				[189, 
+					[188, 
+						[184, 
+							[14], 
+							[142, 
+								[141, 
+									[81, 
+										[80, 
+											[31, 
+												[25, 
+													[24, 
+														[19, 
+															[13], 
+															[15]], 
+														[16]]], 
+												[17]], 
+											[25, 
+												[24, 
+													[19, 
+														[13], 
+														[15]], 
+													[16]]]]], 
+									[74, 
+										[63, 
+											[37, 
+												[30, 
+													[27, 
+														[20, 
+															[13], 
+															[16]], 
+														[15]]], 
+												[13]], 
+											[14]]]]]]], 
+					[17]], 
+				[188, 
+					[184, 
+						[142, 
+							[141, 
+								[81, 
+									[80, 
+										[31, 
+											[25, 
+												[24, 
+													[19, 
+														[13], 
+														[15]], 
+													[16]]], 
+											[17]], 
+										[25, 
+											[24, 
+												[19, 
+													[13], 
+													[15]], 
+												[16]]]]], 
+								[74, 
+									[63, 
+										[37, 
+											[30, 
+												[27, 
+													[20, 
+														[13], 
+														[16]], 
+													[15]]],
+											[13]], 
+										[14]]]]], 
+						[14]]]]], 
+		[188, 
+			[184, 
+				[14], 
+				[142, 
+					[141, 
+						[81, 
+							[80, 
+								[31, 
+									[25, 
+										[24, 
+											[19, 
+												[13], 
+												[15]], 
+											[16]]], 
+									[17]], 
+								[25, 
+									[24, 
+										[19, 
+											[13], 
+											[15]], 
+										[16]]]]], 
+						[74, 
+							[63, 
+								[37, 
+									[30, 
+										[27, 
+											[20, 
+												[13], 
+												[16]], 
+											[15]]], 
+									[13]], 
+								[14]]]]]]]
+	],
+	"resolution": [{
+	"premises": [13, 15],
+	"conclusion": 19,
+	"mgu": [
+	{"X0": "sK3"}, {"X1": "sK2"}
+	]
+	}, {
+	"premises": [13, 16],
+	"conclusion": 20,
+	"mgu": [
+	{"X0": "sK3"}, {"X1": "sK1"}
+	]
+	}, {
+	"premises": [19, 16],
+	"conclusion": 24,
+	"mgu": [
+	{"X0": "sK1"}
+	]
+	}, {
+	"premises": [20, 15],
+	"conclusion": 27,
+	"mgu": [
+	{"X0": "sK2"}
+	]
+	}, {
+	"premises": [25, 17],
+	"conclusion": 31,
+	"mgu": [
+	{}
+	]
+	}, {
+	"premises": [30, 13],
+	"conclusion": 37,
+	"mgu": [
+	{"X0": "sK0"}, {"X1": "sK1"}
+	]
+	}, {
+	"premises": [37, 14],
+	"conclusion": 63,
+	"mgu": [
+	{"X0": "sK2"}
+	]
+	}, {
+	"premises": [31, 25],
+	"conclusion": 80,
+	"mgu": [
+	{"X1": "sK1"}
+	]
+	}, {
+	"premises": [81, 74],
+	"conclusion": 141,
+	"mgu": [
+	{"X0": "sK0"}
+	]
+	}, {
+	"premises": [188, 17],
+	"conclusion": 189,
+	"mgu": [
+	{}
+	]
+	}, {
+	"premises": [189, 188],
+	"conclusion": 200,
+	"mgu": [
+	{"X1": "sK1"}
+	]
+	}, {
+	"premises": [201, 188],
+	"conclusion": 208,
+	"mgu": [
+	{"X0": "sK0"}
+	]
+	}
+	],
+	"duplicate literal removal": [{
+	"premises": 24,
+	"conclusion": 25 
+	}, {
+	"premises": 27,
+	"conclusion": 30 
+	}, {
+	"premises": 63,
+	"conclusion": 74
+	}, {
+	"premises": 80,
+	"conclusion": 81
+	}, {
+	"premises": 141,
+	"conclusion": 142
+	}, {
+	"premises": 184,
+	"conclusion": 188
+	}, {
+	"premises": 200,
+	"conclusion": 201
+	}
+	],
+	"backward demodulation": {
+	"premises": [14, 142],
+	"conclusion": 184
+	}
+}

@@ -1,0 +1,279 @@
+{
+	"vampire_run": {
+	"-ep": "RSTC",
+	"-fde": "none",
+	"-nm": 0,
+	"-updr": "off",
+	"-s": 1,
+	"-awr": "1:1",
+	"-av": "off",
+	"-sa": "discount",
+	"-bs": "off",
+	"-bsr": "off",
+	"-fs": "off",
+	"-fsr": "off",
+	"--bad_option": "off",
+	"--input_syntax": "tptp"
+	},
+	"formulas": {
+	"X1 = X2 | ~map(X0,X2) | ~map(X0,X1)": 13,
+	"map(sK0,sK2) | map(sK0,sK1)": 14,
+	"map(sK3,sK2) | map(sK0,sK1)": 15,
+	"map(sK3,sK1) | map(sK0,sK1)": 16,
+	"~map(X3,sK1) | ~map(X3,X2) | ~map(sK0,X2) | ~map(sK0,sK1)": 17,
+	"sQ4_eqProxy(X0,X1) <=> X0 = X1": 18,
+	"~map(X0,X2) | sQ4_eqProxy(X1,X2) | ~map(X0,X1)": 19,
+	"~sQ4_eqProxy(X0,X1) | ~sQ4_eqProxy(X2,X3) | ~map(X0,X2) | map(X1,X3)": 20,
+	"sQ4_eqProxy(X0,X0)": 21,
+	"~sQ4_eqProxy(X0,X1) | sQ4_eqProxy(X1,X0)": 22,
+	"sQ4_eqProxy(X0,X0)": 24,
+	"~map(sK3,X0) | sQ4_eqProxy(X0,sK2) | map(sK0,sK1)": 26,
+	"~map(sK3,X0) | sQ4_eqProxy(X0,sK1) | map(sK0,sK1)": 27,
+	"sQ4_eqProxy(X0,X0)": 28,
+	"~sQ4_eqProxy(X0,X1) | ~map(X2,X0) | map(X2,X1)": 37,
+	"~sQ4_eqProxy(X0,X1) | ~map(X2,X0) | map(X2,X1)": 39,
+	"sQ4_eqProxy(sK1,sK2) | map(sK0,sK1) | map(sK0,sK1)": 49,
+	"sQ4_eqProxy(sK1,sK2) | map(sK0,sK1)": 50,
+	"sQ4_eqProxy(sK2,sK1) | map(sK0,sK1) | map(sK0,sK1)": 55,
+	"sQ4_eqProxy(sK2,sK1) | map(sK0,sK1)": 58,
+	"~map(X0,sK1) | map(sK0,sK1) | map(X0,sK2)": 82,
+	"~map(X0,sK2) | map(sK0,sK1) | map(X0,sK1)": 106,
+	"map(sK0,sK1) | map(sK0,sK1) | map(sK0,sK1)": 234,
+	"map(sK0,sK1)": 237,
+	"map(sK0,sK2) | map(sK0,sK1)": 239,
+	"~map(sK0,X0) | ~map(sK0,X0) | ~map(sK0,sK1)": 240,
+	"~map(sK0,X0) | ~map(sK0,sK1)": 242,
+	"~map(X0,sK2) | map(X0,sK1) | map(sK0,sK1)": 329,
+	"map(sK0,sK1) | map(sK0,sK1) | map(sK0,sK1)": 3621,
+	"map(sK0,sK1)": 3633,
+	"~map(sK0,sK1)": 3667,
+	"$false": 4088
+	},
+	"proof": [
+	4088, 
+		[3667, 
+			[242, 
+				[240, 
+					[237, 
+						[234, 
+							[106, 
+								[58, 
+									[55, 
+										[15], 
+										[27, 
+											[19, 
+												[13], 
+												[18]], 
+											[16]]]], 
+								[39, 
+									[20, 
+										[18]], 
+									[21, 
+										[18]]]], 
+							[14]]], 
+					[17]]], 
+			[237, 
+				[234, 
+					[106, 
+						[58, 
+							[55, 
+								[15], 
+								[27, 
+									[19, 
+										[13], 
+										[18]], 
+									[16]]]], 
+						[39, 
+							[20, 
+								[18]], 
+							[21, 
+								[18]]]], 
+					[14]]]], 
+		[3633, 
+			[3621, 
+				[239, 
+					[237,
+						[234, 
+							[106, 
+								[58, 
+									[55, 
+										[27, 
+											[19, 
+												[13], 
+												[18]], 
+											[16]], 
+										[15]]], 
+								[39, 
+									[20, 
+										[18]], 
+									[21, 
+										[18]]]], 
+							[14]]], 
+					[82, 
+						[50, 
+							[49, 
+								[16], 
+								[26, 
+									[15], 
+									[19, 
+										[13], 
+										[18]]]]], 
+						[39, 
+							[20, 
+								[18]], 
+							[21, 
+								[18]]]]], 
+				[329, 
+					[37, 
+						[20, 
+							[18]], 
+						[28, 
+							[24, 
+								[22, 
+									[18]], 
+								[21, 
+									[18]]], 
+							[22, 
+								[18]]]], 
+					[58, 
+						[55, 
+							[15], 
+							[27, 
+								[19, 
+									[13], 
+									[18]], 
+								[16]]]]]]]
+	],
+	"resolution": [{
+	"premises": [22, 21],
+	"conclusion": 24,
+	"mgu": [
+	{"X1": "X0"}
+	]
+	}, {
+	"premises": [19, 15],
+	"conclusion": 26,
+	"mgu": [
+	{"X0": "sK3"},{"X2": "sK2"}
+	]
+	}, {
+	"premises": [19, 16],
+	"conclusion": 27,
+	"mgu": [
+	{"X0": "sK3"},{"X2": "sK1"}
+	]
+	}, {
+	"premises": [24, 22],
+	"conclusion": 28,
+	"mgu": [
+	{"X1": "X0"}
+	]
+	}, {
+	"premises": [20, 28],
+	"conclusion": 37,
+	"mgu": [
+	{"X0": "X2"}, {"X1": "X2"}
+	]
+	}, {
+	"premises": [20, 21],
+	"conclusion": 39,
+	"mgu": [
+	{"X0": "X2"}, {"X1": "X2"}
+	]
+	}, {
+	"premises": [26, 16],
+	"conclusion": 49,
+	"mgu": [
+	{"X0": "sK1"}
+	]
+	}, {
+	"premises": [27, 15],
+	"conclusion": 55,
+	"mgu": [
+	{"X0": "sK2"}
+	]
+	}, {
+	"premises": [50, 39],
+	"conclusion": 82,
+	"mgu": [
+	{"X0": "sK1"}, {"X1": "sK2"}
+	]
+	}, {
+	"premises": [58, 39],
+	"conclusion": 106,
+	"mgu": [
+	{"X0": "sK2"}, {"X1": "sK1"}
+	]
+	}, {
+	"premises": [106, 14],
+	"conclusion": 234,
+	"mgu": [
+	{"X0": "sK0"}
+	]
+	}, {
+	"premises": [237, 82],
+	"conclusion": 239,
+	"mgu": [
+	{"X0": "sK0"}
+	]
+	}, {
+	"premises": [237, 17],
+	"conclusion": 240,
+	"mgu": [
+	{"X3": "sK0"}
+	]
+	}, {
+	"premises": [37, 58],
+	"conclusion": 329,
+	"mgu": [
+	{"X0": "sK2"}, {"X1": "sK1"}
+	]
+	}, {
+	"premises": [239, 329],
+	"conclusion": 3621,
+	"mgu": [
+	{"X0": "sK0"}
+	]
+	}, {
+	"premises": [242, 237],
+	"conclusion": 3667,
+	"mgu": [
+	{"X0": "sK1"}
+	]
+	}, {
+	"premises": [3667, 3633],
+	"conclusion": 4088,
+	"mgu": [
+	{}
+	]
+	}
+	],
+	"duplicate literal removal": [{
+	"premises": 49,
+	"conclusion": 50
+	}, {
+	"premises": 55,
+	"conclusion": 58
+	}, {
+	"premises": 234,
+	"conclusion": 237
+	}, {
+	"premises": 240,
+	"conclusion": 242
+	}, {
+	"premises": 3621,
+	"conclusion": 3633
+	}
+	],
+	"equality proxy replacement": {
+	"premises": [13, 18],
+	"conclusion": 19,
+	"mgu": [
+	{"X0": "X1"},{"X1": "X2"}
+	]
+	},
+	"equality proxy axiom": {
+	"premises": [18],
+	"conclusion": [20, 21, 22]
+	}
+}

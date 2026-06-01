@@ -1,0 +1,113 @@
+tff('declare_$i1',type,r1:$i).
+tff('declare_$i2',type,r2:$i).
+tff('declare_$i3',type,r3:$i).
+tff('declare_$i4',type,r4:$i).
+tff('declare_$i5',type,r5:$i).
+tff('declare_$i6',type,r6:$i).
+tff('finite_domain_$i',axiom,
+      ! [X:$i] : (
+         X = r1 | X = r2 | X = r3 | X = r4 | X = r5 | 
+         X = r6
+      ) ).
+
+tff('distinct_domain_$i',axiom,
+         r1 != r2 & r1 != r3 & r1 != r4 & r1 != r5 & r1 != r6 & 
+         r2 != r3 & r2 != r4 & r2 != r5 & r2 != r6 & r3 != r4 & 
+         r3 != r5 & r3 != r6 & r4 != r5 & r4 != r6 & r5 != r6
+).
+
+tff(declare_next,type,next: ($i * $i) > $o).
+tff(predicate_next,axiom,
+           ~next(r1,r1)
+         & next(r1,r2)
+         & ~next(r1,r3)
+         & ~next(r1,r4)
+         & ~next(r1,r5)
+         & ~next(r1,r6)
+         & ~next(r2,r1)
+         & ~next(r2,r2)
+         & next(r2,r3)
+         & ~next(r2,r4)
+         & ~next(r2,r5)
+         & ~next(r2,r6)
+         & ~next(r3,r1)
+         & ~next(r3,r2)
+         & ~next(r3,r3)
+         & next(r3,r4)
+         & ~next(r3,r5)
+         & ~next(r3,r6)
+         & ~next(r4,r1)
+         & ~next(r4,r2)
+         & ~next(r4,r3)
+         & ~next(r4,r4)
+         & next(r4,r5)
+         & ~next(r4,r6)
+         & ~next(r5,r1)
+         & ~next(r5,r2)
+         & ~next(r5,r3)
+         & ~next(r5,r4)
+         & ~next(r5,r5)
+         & next(r5,r6)
+         & ~next(r6,r1)
+         & ~next(r6,r2)
+         & ~next(r6,r3)
+         & ~next(r6,r4)
+         & ~next(r6,r5)
+         & ~next(r6,r6)
+
+).
+
+tff(declare_hamster,type,hamster: ($i) > $o).
+tff(predicate_hamster,axiom,
+           ~hamster(r1)
+         & ~hamster(r2)
+         & ~hamster(r3)
+         & ~hamster(r4)
+         & ~hamster(r5)
+         & hamster(r6)
+
+).
+
+tff(declare_nervous,type,nervous: ($i) > $o).
+tff(predicate_nervous,axiom,
+           ~nervous(r1)
+         & ~nervous(r2)
+         & ~nervous(r3)
+         & nervous(r4)
+         & ~nervous(r5)
+         & ~nervous(r6)
+
+).
+
+tff(declare_dog,type,dog: ($i) > $o).
+tff(predicate_dog,axiom,
+           dog(r1)
+         & ~dog(r2)
+         & dog(r3)
+         & dog(r4)
+         & dog(r5)
+         & ~dog(r6)
+
+).
+
+tff(declare_cat,type,cat: ($i) > $o).
+tff(predicate_cat,axiom,
+           ~cat(r1)
+         & cat(r2)
+         & ~cat(r3)
+         & ~cat(r4)
+         & ~cat(r5)
+         & ~cat(r6)
+
+).
+
+tff(declare_lit,type,lit: ($i) > $o).
+tff(predicate_lit,axiom,
+           ~lit(r1)
+         & ~lit(r2)
+         & ~lit(r3)
+         & lit(r4)
+         & ~lit(r5)
+         & ~lit(r6)
+
+).

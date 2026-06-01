@@ -1,0 +1,222 @@
+{
+	"vampire_run": {
+	"-ep": "off",
+	"-fde": "none",
+	"-nm": 0,
+	"-updr": "off",
+	"-s": 1,
+	"-awr": "100:1",
+	"-av": "on",
+	"-sa": "discount",
+	"-bs": "off",
+	"-bsr": "off",
+	"-fs": "off",
+	"-fsr": "off",
+	"--bad_option": "off",
+	"--input_syntax": "tptp"
+	},
+	"formulas": {
+	"~subset(X1,X2) | member(X0,X2) | ~member(X0,X1)": 1,
+	"member(member_of_1_not_of_2(X1,X2),X1) | subset(X1,X2)": 2,
+	"~member(member_of_1_not_of_2(X1,X2),X2) | subset(X1,X2)": 3,
+	"~member(X0,dirimg(X1)) | member(sK0(X0,X1),X1)": 27,
+	"~member(X0,dirimg(X1)) | role(sK0(X0,X1),X0)": 28,
+	"~role(X2,X0) | member(X0,dirimg(X1)) | ~member(X2,X1)": 29,
+	"~role(X0,X3) | member(X3,X1) | ~member(X0,valres(X1))": 30,
+	"role(X0,sK1(X0,X1)) | member(X0,valres(X1))": 31,
+	"~member(sK1(X0,X1),X1) | member(X0,valres(X1))": 32,
+	"subset(sK2,valres(sK3)) | subset(dirimg(sK2),sK3)": 33,
+	"~subset(sK2,valres(sK3)) | ~subset(dirimg(sK2),sK3)": 34,
+	"1 <=> subset(dirimg(sK2),sK3)": 36,
+	"subset(dirimg(sK2),sK3) <- (1)": 38,
+	"2 <=> subset(sK2,valres(sK3))": 40,
+	"subset(sK2,valres(sK3)) <- (2)": 42,
+	"1 | 2": 43,
+	"~1 | ~2": 44,
+	"~member(X0,sK2) | member(X0,valres(sK3)) <- (2)": 47,
+	"member(sK0(member_of_1_not_of_2(dirimg(X0),X1),X0),X0) | subset(dirimg(X0),X1)": 58,
+	"role(sK0(member_of_1_not_of_2(dirimg(X0),X1),X0),member_of_1_not_of_2(dirimg(X0),X1)) | subset(dirimg(X0),X1)": 59,
+	"~member(X0,X2) | member(sK1(X0,X1),dirimg(X2)) | member(X0,valres(X1))": 60,
+	"member(sK0(member_of_1_not_of_2(dirimg(sK2),X0),sK2),valres(sK3)) | subset(dirimg(sK2),X0) <- (2)": 67,
+	"member(sK1(member_of_1_not_of_2(X0,X1),X2),dirimg(X0)) | member(member_of_1_not_of_2(X0,X1),valres(X2)) | subset(X0,X1)": 68,
+	"~member(sK0(member_of_1_not_of_2(dirimg(X0),X1),X0),valres(X2)) | member(member_of_1_not_of_2(dirimg(X0),X1),X2) | subset(dirimg(X0),X1)": 72,
+	"member(member_of_1_not_of_2(dirimg(sK2),X0),sK3) | subset(dirimg(sK2),X0) | subset(dirimg(sK2),X0) <- (2)": 98,
+	"member(member_of_1_not_of_2(dirimg(sK2),X0),sK3) | subset(dirimg(sK2),X0) <- (2)": 101,
+	"subset(dirimg(sK2),sK3) | subset(dirimg(sK2),sK3) <- (2)": 122,
+	"subset(dirimg(sK2),sK3) <- (2)": 124,
+	"1 | ~2": 125,
+	"~member(X0,dirimg(sK2)) | member(X0,sK3) <- (1)": 127,
+	"member(sK1(member_of_1_not_of_2(sK2,X0),X1),sK3) | member(member_of_1_not_of_2(sK2,X0),valres(X1)) | subset(sK2,X0) <- (1)": 137,
+	"member(member_of_1_not_of_2(sK2,X0),valres(sK3)) | subset(sK2,X0) | member(member_of_1_not_of_2(sK2,X0),valres(sK3)) <- (1)": 182,
+	"member(member_of_1_not_of_2(sK2,X0),valres(sK3)) | subset(sK2,X0) <- (1)": 184,
+	"subset(sK2,valres(sK3)) | subset(sK2,valres(sK3)) <- (1)": 328,
+	"subset(sK2,valres(sK3)) <- (1)": 331,
+	"2 | ~1": 332,
+	"$false": 333
+	},
+	"proof": [
+	333, 
+		[43, 
+			[33], 
+			[40], 
+			[36]], 
+		[44, 
+			[34], 
+			[40], 
+			[36]], 
+		[125, 
+			[40], 
+			[36], 
+			[124, 
+				[122, 
+					[101, 
+						[98, 
+							[72, 
+								[59, 
+									[28], 
+									[2]], 
+								[30]], 
+							[67, 
+								[58, 
+									[27], 
+									[2]], 
+								[47, 
+									[1], 
+									[42, 
+										[40]]]]]], 
+					[3]]]], 
+		[332, 
+			[331, 
+				[328, 
+					[184, 
+						[182, 
+							[137, 
+								[127, 
+									[38, 
+										[36]], 
+									[1]], 
+								[68, 
+									[60, 
+										[29], 
+										[31]], 
+									[2]]], 
+							[32]]], 
+					[3]]], 
+			[36], 
+			[40]]
+	],
+	"resolution": [{
+	"premises": [1, 42],
+	"conclusion": 47,
+	"mgu": [
+	{"X1": "sK2"}, {"X2": "valres(sK3)"}
+	]
+	}, {
+	"premises": [27, 2],
+	"conclusion": 58,
+	"mgu": [
+	{"X0": "member_of_1_not_of_2(dirimg(X1​),X2​)"}, {"X1": "dirimg(X1)"}
+	]
+	}, {
+	"premises": [28, 2],
+	"conclusion": 59,
+	"mgu": [
+	{"X0": "member_of_1_not_of_2(dirimg(X1​),X2​)"}, {"X1": "dirimg(X1)"}
+	]
+	}, {
+	"premises": [58, 47],
+	"conclusion": 67,
+	"mgu": [
+	{"X0": "sK2"}
+	]
+	}, {
+	"premises": [60, 2],
+	"conclusion": 68,
+	"mgu": [
+	{"X0": "member_of_1_not_of_2(X1,X2​)"}, {"X1": "X2"}
+	]
+	}, {
+	"premises": [59, 30],
+	"conclusion": 72,
+	"mgu": [
+	{"X0": "sK0(member_of_1_not_of_2(dirimg(X0),X1),X0)"}, {"X3": "member_of_1_not_of_2(dirimg(X0),X1)"}
+	]
+	}, {
+	"premises": [72, 67],
+	"conclusion": 98,
+	"mgu": [
+	{"X0": "sK2"}, {"X2": "sK3"}
+	]
+	}, {
+	"premises": [101, 3],
+	"conclusion": 122,
+	"mgu": [
+	{"X0": "sK3"}, {"X1": "dirimg(sK2)"}, {"X2": "sK3"}
+	]
+	}, {
+	"premises": [38, 1],
+	"conclusion": 127,
+	"mgu": [
+	{"X1": "dirimg(sK2)"}, {"X2": "sK3"}
+	]
+	}, {
+	"premises": [127, 68],
+	"conclusion": 137,
+	"mgu": [
+	{"X0": "sK2"}
+	]
+	}, {
+	"premises": [137, 32],
+	"conclusion": 182,
+	"mgu": [
+	{"X0": "member_of_1_not_of_2(sK2,X0)"}, {"X1": "sK3"}
+	]
+	}, {
+	"premises": [184, 3],
+	"conclusion": 328,
+	"mgu": [
+	{"X0": "valres(sK3)"}, {"X1": "sK2"}, {"X2": "valres(sK3)"}
+	]
+	}
+	],
+	"duplicate literal remova": [{
+	"premises": [98],
+	"conclusion": 101
+	}, {
+	"premises": [122],
+	"conclusion": 124
+	}, {
+	"premises": [182],
+	"conclusion": 184
+	}, {
+	"premises": [328],
+	"conclusion": 331
+	}
+	],
+	"avatar component clause": [{
+	"premises": [36],
+	"conclusion": 38
+	}, {
+	"premises": [40],
+	"conclusion": 42
+	}
+	],
+	"avatar split clause": [{
+	"premises": [33, 40, 36],
+	"conclusion": 43
+	}, {
+	"premises": [34, 40, 36],
+	"conclusion": 44
+	}, {
+	"premises": [124, 40, 36],
+	"conclusion": 125
+	}, {
+	"premises": [331, 36, 40],
+	"conclusion": 332
+	}
+	],
+	"avatar sat refutation": {
+	"premises": [43, 44, 125, 332],
+	"conclusion": 333 
+	}
+}	

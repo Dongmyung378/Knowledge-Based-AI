@@ -1,0 +1,127 @@
+#!/bin/sh
+################################################################################
+# Author: Francisco Lobo <francisco.lobo@manchester.ac.uk>
+# Version: 4.1
+################################################################################
+
+# wrapper name
+VAMPIRE_RUN="$(basename "$0")"
+# number of given args
+argc=$#
+
+# check location of vampire binary
+VAMPIRE_BIN=/opt/vampire/vampire
+if ! test -x "$VAMPIRE_BIN"; then
+  exec 1>&2
+  echo "$VAMPIRE_RUN: Cannot find vampire binary"
+  exit 1
+fi
+
+_help() {
+  cat <<EOF
+Usage: $VAMPIRE_RUN [--preset gc|discount|otter] [--verbose off|gc|all] [options...] [problem]
+Runs Vampire with sensible default/preset options on [problem].
+
+Sets global options that
+- disable Vampire command warnings for safe options
+- fix TPTP for input syntax
+Sets preprocessing options that
+- enable equality proxy transformation (-ep RSTC)
+- disable function and predicate definition removal (-fde none -updr off)
+- disable introduction of named subformulas (-nm 0)
+Sets proof search options that
+- fix literal selection for unordered resolution (-s 0)
+- disable AVATAR clause splitting during saturation (-av off)
+
+The 3 possible --preset options are
+- gc|given_clause: mimics the plain given clause loop
+- discount: mimics the discount loop
+- otter: mimics the otter loop
+The gc|given_clause preset options are used by default.
+These presets have different simplification options
+- gc|given_clause does not apply backward or forward subsumption
+  (-bs off -bsr off -fs off -fsr off)
+- discount and otter: apply backward and forward subsumption
+  (-bs on -bsr on -fs on -fsr on)
+
+The 3 possible --verbose options are
+- off: normal vampire output
+- gc: show information to help follow the given clause loop
+- all: show (almost) all debug information
+
+You can override each of these settings using [options...] arguments.
+Use $VAMPIRE_BIN --help to get further information on Vampire.
+EOF
+}
+
+# set default global options
+set -- "$@" --bad_option off --input_syntax tptp
+# set default preprocessing options
+set -- "$@" -ep RSTC -fde none -nm 0 -updr off
+# set default proof search options
+set -- "$@" -s 0 -av off
+# set options for given clause saturation preset
+set -- "$@" -sa discount -bs off -bsr off -fs off -fsr off
+
+# push given args after defaults, interpreting --preset options
+i=0
+while [ $i -lt $argc ]; do
+  case "$1" in
+    --help)
+      _help
+      exit 0
+      ;;
+    --preset)
+      case "$2" in
+        otter)
+          set -- "$@" -sa otter -bs on -bsr on -fs on -fsr on
+          ;;
+        discount)
+          set -- "$@" -sa discount -bs on -bsr on -fs on -fsr on
+          ;;
+        gc|given_clause)
+          set -- "$@" -sa discount -bs off -bsr off -fs off -fsr off
+          ;;
+        *)
+          exec 1>&2
+          echo "$VAMPIRE_RUN: Argument error '$2' is an invalid value for preset"
+          echo "$VAMPIRE_RUN: Valid --preset values are: gc, discount, otter"
+          exit 4
+      esac
+      : $((i+=1))
+      shift
+      ;;
+    --verbose)
+      case "$2" in
+        all)
+          set -- "$@" --show_everything on --proof_extra free
+          ;;
+        gc)
+          set -- "$@" --show_active on --show_new on --proof_extra free
+          ;;
+        off)
+          set -- "$@" --show_active off --show_new off --show_everything off --proof_extra off
+          ;;
+        *)
+          exec 1>&2
+          echo "$VAMPIRE_RUN: Argument error '$2' is an invalid value for verbose"
+          echo "$VAMPIRE_RUN: Valid --verbose values are: off, gc, all"
+          exit 4
+      esac
+      : $((i+=1))
+      shift
+      ;;
+    *)
+      set -- "$@" "$1"
+      ;;
+  esac
+  : $((i+=1))
+  shift
+done
+
+# run vampire with chosen preset and given args
+exec "$VAMPIRE_BIN" "$@"
+exit $?
+
+################################################################################
+# vim:set sw=2 ts=2 et:
