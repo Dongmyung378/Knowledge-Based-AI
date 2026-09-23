@@ -1,100 +1,91 @@
-# COMP24412 - Knowledge-Based Artificial Intelligence
+# Knowledge-Based Artificial Intelligence Portfolio
 
-Coursework for COMP24412 (2024-25). The repository contains three labs covering first-order reasoning, Prolog programming, and symbolic machine learning.
+[English](README.md) | [한국어](README.ko.md)
 
-## Contents
+A curated portfolio of three projects from COMP24412, covering automated theorem proving, logic programming, and symbolic machine learning. The repository is organised around the work itself: each project explains the problem, implementation, reproducible workflow, and technical trade-offs.
 
-| Directory | Topic | Main work |
-| --- | --- | --- |
-| `comp24412_h18609dp-lab1` | Automated reasoning | TPTP problem files and proof/model configurations for Vampire |
-| `comp24412_h18609dp-lab2` | Logic programming | Prolog knowledge bases and a constraint-based spacecraft component design checker |
-| `comp24412_h18609dp-lab3` | Symbolic machine learning | Decision-tree and FOIL-style rule learners, tests, and evaluation scripts |
+## Portfolio at a glance
 
-## Lab 1 - Automated reasoning
+| Project | Focus | What it demonstrates | Core technologies |
+| --- | --- | --- | --- |
+| [Automated Reasoning](projects/automated-reasoning/README.md) | First-order logic and proof search | TPTP modelling, proof generation, model finding, and proof artefact inspection | Vampire, TPTP, Python, LaTeX |
+| [Logic Programming](projects/logic-programming/README.md) | Declarative constraint modelling | Recursive Prolog predicates for validating nested spacecraft component designs | SWI-Prolog |
+| [Symbolic Machine Learning](projects/symbolic-machine-learning/README.md) | Explainable concept learning | Decision trees, gain ratio, FOIL-style rule induction, recursive relations, and evaluation tooling | Python, PySwip, SWI-Prolog, pytest |
 
-`comp24412_h18609dp-lab1` contains first-order logic encodings in TPTP format. The main examples are:
+## Selected highlights
 
-- `maps.p` - relations and proofs concerning maps
-- `sets.p` and `sets.cnf` - set-theory encodings and their clausified form
-- `pets.p` - a logic-puzzle encoding
+- Encoded first-order problems and inspected both proofs and finite-model variants.
+- Built recursive Prolog predicates that validate compatibility, nested shields, component use, and structural constraints.
+- Implemented a decision-tree learner and converted learned trees into readable logical expressions.
+- Implemented a FOIL-style inductive logic programming learner backed by a Prolog knowledge base.
+- Developed `my-dtl`, a gain-ratio and depth-limited decision-tree variant. Recorded coursework experiments report 44-80% lower training time and a 19.1 percentage-point gain in one high-noise setting, alongside documented regressions in lower-noise and limited-data cases.
 
-The accompanying `.json`, `.tex`, `.pdf`, and `.tff` files record proof specifications, derivations, and model-finding variants.
+## Repository map
 
-The `run_vampire` wrapper starts Vampire with presets for given-clause, discount, or Otter-style saturation. It expects the executable at `/opt/vampire/vampire`, so adjust `VAMPIRE_BIN` in the script if Vampire is installed elsewhere.
-
-```bash
-cd comp24412_h18609dp-lab1
-./run_vampire --preset gc maps.p
+```text
+.
+├── README.md / README.ko.md
+└── projects/
+    ├── automated-reasoning/
+    │   ├── problems/       # TPTP and clausified problem definitions
+    │   ├── artifacts/      # Proof specifications and rendered derivations
+    │   ├── tools/          # Vampire wrapper and proof-to-LaTeX helper
+    │   └── references/     # Original coursework briefs
+    ├── logic-programming/
+    │   ├── src/            # Prolog knowledge bases and predicates
+    │   └── references/     # Original coursework brief
+    └── symbolic-machine-learning/
+        ├── learning/       # Decision-tree and FOIL implementations
+        ├── tests/          # Public tests and graph fixtures
+        ├── docs/           # Experiment report and evaluation guide
+        └── references/     # Coursework and lecture material
 ```
 
-## Lab 2 - Logic programming
+## Quick start
 
-`comp24412_h18609dp-lab2` is designed to be loaded in SWI-Prolog.
+### 1. Automated reasoning
 
-- `database.pl` defines spacecraft components and compatible component pairs.
-- `electrical.pl` builds on that database with predicates for checking nested shield designs, counting shields, and ensuring each required component is used once.
-- `warmup.pl` and `backup.pl` are smaller supporting exercises.
+Install [Vampire](https://vprover.github.io/) and update `VAMPIRE_BIN` in `tools/run_vampire` if the executable is not located at `/opt/vampire/vampire`.
 
-For example:
+```bash
+cd projects/automated-reasoning
+./tools/run_vampire --preset gc problems/maps.p
+```
+
+### 2. Logic programming
+
+Install SWI-Prolog, then load the completed design checker.
+
+```bash
+cd projects/logic-programming
+swipl -s src/electrical.pl
+```
 
 ```prolog
-?- [electrical].
 ?- safe_design([part(radar), part(cpu)]).
 true.
 ```
 
-## Lab 3 - Symbolic machine learning
+### 3. Symbolic machine learning
 
-The third lab provides two learning approaches in `comp24412_h18609dp-lab3/learning`:
-
-- `attr_learner.py` implements a decision-tree learner (`dtl`) and an alternative `my-dtl` learner using gain ratio and a depth limit.
-- `rule_learner.py` implements a FOIL-style inductive logic programming learner (`foil`) over a Prolog knowledge base.
-- `generate.py` creates attribute-based datasets.
-
-`Exercise3.md` documents the `my-dtl` design and its measured trade-offs: substantially shorter training times and improved performance on one high-noise setting, with weaker results for some low-noise and limited-training-data cases.
-
-### Setup
-
-Lab 3 requires Python and SWI-Prolog. Create an environment, install the Python dependencies, then run commands from the lab directory.
+Python 3 and SWI-Prolog are required. The following Conda workflow installs both in one local environment:
 
 ```bash
-cd comp24412_h18609dp-lab3
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+cd projects/symbolic-machine-learning
+conda create -p .venv -c conda-forge python=3.12 swi-prolog=9.2.9 pip -y
+conda activate ./.venv
+python -m pip install -r requirements.txt
+python -m pytest
 ```
 
-On Windows PowerShell, activate the environment with:
+See the project README for a standard Python `venv` setup when SWI-Prolog is already installed on the system.
 
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
+## Documentation
 
-`pyswip` also needs a working SWI-Prolog installation that Python can locate.
+Every Markdown document is written in English by default and links to a Korean counterpart. Start with an individual project README for technical details, or read the symbolic learning [experiment report](projects/symbolic-machine-learning/docs/experiment-report.md) for measured results and limitations.
 
-### Tests and experiments
+## Context
 
-Run the public tests:
+This repository began as coursework for the University of Manchester's COMP24412 Knowledge-Based Artificial Intelligence unit (2024-25). Original assignment and lecture PDFs are retained under each project's `references/` directory for provenance. Generated caches, LaTeX auxiliary files, obsolete course synchronisation/submission scripts, and an incomplete backup were removed from the portfolio view.
 
-```bash
-cd comp24412_h18609dp-lab3
-pytest
-```
-
-Compare the supplied decision-tree learners on noisy synthetic data:
-
-```bash
-python evaluate_attributes.py eval-noisy -a dtl -a my-dtl -c 0.3 -c 0.5 -c 0.7 -s 10 -d 10
-```
-
-Evaluate the rule learner against the included graph knowledge base:
-
-```bash
-python evaluate_rules.py -a foil -d tests/graph_small.json -k tests/graph_small.pl -t "reachable(X,Y)" -r -e 0.8
-```
-
-Use `--help` with `evaluate_attributes.py`, `evaluate_rules.py`, or `generate_graphs.py` to view the available options.
-
-## Notes
-
-The original per-lab READMEs retain the course submission guidance supplied with the lab materials. This top-level document is intended as a quick map of the completed repository and how to run its code.
+The repository does not currently declare a licence. Please treat the code and supplied course material accordingly.
