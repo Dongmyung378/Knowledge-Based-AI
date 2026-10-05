@@ -49,7 +49,7 @@ COMP24412에서 수행한 세 프로젝트를 자동 정리 증명, 논리 프�
 
 ```bash
 cd projects/automated-reasoning
-./tools/run_vampire --preset gc problems/maps.p
+sh ./tools/run_vampire --preset gc problems/maps.p
 ```
 
 ### 2. 논리 프로그래밍
@@ -79,6 +79,11 @@ python -m pytest
 ```
 
 SWI-Prolog가 이미 시스템에 설치되어 있다면 프로젝트 README의 일반 Python `venv` 설치 방법을 사용할 수 있습니다.
+
+2026-10-05에 Python 3.12.7과 SWI-Prolog 9.2.9 환경에서 기호 학습 공개 테스트
+30개가 통과했고, 생성 결정 트리 기본 실험과 재귀 그래프 홀드아웃 평가도 종료했습니다.
+[검증 명령과 버전 조합](projects/symbolic-machine-learning/README.ko.md#실제-기본-실험-검증-2026-10-05)을
+참고하세요. Vampire는 별도의 자동 추론 경로에만 필요합니다.
 
 ## 문서
 

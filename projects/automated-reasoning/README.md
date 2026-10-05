@@ -33,13 +33,13 @@ The wrapper currently expects Vampire at `/opt/vampire/vampire`. If needed, edit
 
 ```bash
 cd projects/automated-reasoning
-./tools/run_vampire --preset gc problems/maps.p
+sh ./tools/run_vampire --preset gc problems/maps.p
 ```
 
 Other available presets are `discount` and `otter`; use `--verbose gc` or `--verbose all` to inspect the search process.
 
 ```bash
-./tools/run_vampire --preset discount --verbose gc problems/sets.p
+sh ./tools/run_vampire --preset discount --verbose gc problems/sets.p
 ```
 
 ## Design notes

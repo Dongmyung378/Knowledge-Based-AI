@@ -2,7 +2,7 @@ import random
 import pytest
 
 from learning.attr_learner import Node, Leaf, to_logic_expression, same_target, plurality_value, binary_entropy, \
-    Disjunction, Conjunction, DecisionTreeLearner
+    Disjunction, Conjunction, DecisionTreeLearner, MyDecisionTreeLearner
 from learning.generate import AttributeDatasetGenerator
 from learning.util import Dataset
 
@@ -45,6 +45,43 @@ def test_tree_to_logic_expression_public():
     assert len(logic_expression.conjunctions) == 5
     for e in [expected_1, expected_2, expected_3, expected_4, expected_5]:
         assert e in str(logic_expression)
+
+
+@pytest.mark.parametrize("target", [False, True])
+def test_constant_tree_preserves_its_classification(target):
+    expression = to_logic_expression(Leaf(target))
+    assert expression({}) is target
+    assert expression({"A": False}) is target
+    assert expression({"A": True}) is target
+
+
+@pytest.mark.parametrize("tree", [
+    Node("A"),
+    Node("A", {False: Leaf(False), True: Leaf(False)}),
+])
+def test_tree_without_positive_paths_is_false(tree):
+    expression = to_logic_expression(tree)
+    assert expression({"A": False}) is False
+    assert expression({"A": True}) is False
+
+
+def test_tree_logic_preserves_positive_and_negative_branches():
+    tree = Node("A", {False: Leaf(False), True: Node("B", {
+        False: Leaf(True), True: Leaf(False),
+    })})
+    expression = to_logic_expression(tree)
+    for a in (False, True):
+        for b in (False, True):
+            assert expression({"A": a, "B": b}) is (a and not b)
+
+
+@pytest.mark.parametrize("learner", [DecisionTreeLearner, MyDecisionTreeLearner])
+@pytest.mark.parametrize("target", [False, True])
+def test_fit_and_predict_on_a_single_class_dataset(learner, target):
+    dataset = Dataset([{"A": False, "target": target}, {"A": True, "target": target}])
+    algorithm = learner(dataset)
+    algorithm.fit()
+    assert algorithm.predict_all(dataset) == [target, target]
 
 
 def test_same_target_public():

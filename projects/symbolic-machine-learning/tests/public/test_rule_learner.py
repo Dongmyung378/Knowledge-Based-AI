@@ -147,8 +147,8 @@ def test_overall_public_2():
         assert hypothesis.head == Literal.from_str('grandparent(X,Y)')
         assert len(hypothesis.body.expressions) == 2
         string_repr_hyp = str(hypothesis)
-        assert re.findall('parent\(X,V_\d+\)', string_repr_hyp)
-        assert re.findall('parent\(V_\d+,Y\)', string_repr_hyp)
+        assert re.findall(r'parent\(X,V_\d+\)', string_repr_hyp)
+        assert re.findall(r'parent\(V_\d+,Y\)', string_repr_hyp)
 
 
 def test_recursive_public():
@@ -164,4 +164,4 @@ def test_recursive_public():
         horn_clauses = f.hypothesis.expressions
         bodies = [e.body for e in horn_clauses]
         assert any("connected(X,Y)" in str(b) for b in bodies)
-        assert any(re.findall('reachable\(V_\d+,Y\)', str(b)) and re.findall('reachable\(X,V_\d+\)', str(b)) for b in bodies)
+        assert any(re.findall(r'reachable\(V_\d+,Y\)', str(b)) and re.findall(r'reachable\(X,V_\d+\)', str(b)) for b in bodies)

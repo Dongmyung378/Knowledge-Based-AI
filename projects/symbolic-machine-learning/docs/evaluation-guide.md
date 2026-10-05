@@ -83,7 +83,20 @@ python evaluate_rules.py \
 - `-r` allows recursive use of the target predicate.
 - `-e` is the training fraction; omit it to train without a hold-out evaluation.
 
-PySwip and SWI-Prolog can retain state or become unstable across repeated runs. Run algorithms or failing tests in separate processes when necessary.
+Training and hold-out prediction run within the same FOIL context. Cleanup then
+removes the learned target and unloads its knowledge base. The regression suite
+checks this lifecycle and consecutive learners with different knowledge bases in one
+process; prediction after leaving the context is unsupported.
+
+For the tracked `graph_small` fixture and default seed 42, the verified command
+reports 12/12 positive and 59/59 negative hold-out predictions. Recursive target
+predicates use SWI-Prolog tabling so that cyclic graph queries, including unreachable
+pairs, terminate. Cached target answers are cleared when the learned clauses change.
+See the [validation environment and finite-graph scope](../README.md#verified-smoke-experiments-2026-10-05).
+
+The CLI uses generated attribute data or the JSON/Prolog fixtures shown here.
+`Dataset.from_csv()` and `Dataset.to_csv()` are unused coursework placeholders and
+are outside these supported workflows.
 
 ## Graph dataset generation
 

@@ -33,13 +33,13 @@
 
 ```bash
 cd projects/automated-reasoning
-./tools/run_vampire --preset gc problems/maps.p
+sh ./tools/run_vampire --preset gc problems/maps.p
 ```
 
 `discount`, `otter` 프리셋도 사용할 수 있으며 `--verbose gc` 또는 `--verbose all`로 탐색 과정을 확인할 수 있습니다.
 
 ```bash
-./tools/run_vampire --preset discount --verbose gc problems/sets.p
+sh ./tools/run_vampire --preset discount --verbose gc problems/sets.p
 ```
 
 ## 설계 메모

@@ -68,11 +68,11 @@ def main(algos: List[str], dataset, kb, eval, target, recursive, random_seed):
             algo.fit()
             click.echo(f"Algorithm {click.style(algo_name, fg='green')} learned")
             click.echo(algo.hypothesis)
-        if eval:
-            acc_pos = sum(algo.predict(e) for e in eval_pos)
-            acc_neg = sum(not algo.predict(e) for e in eval_neg)
-            click.echo(f"Accuracy on positive examples: {acc_pos}/{len(eval_pos)} ({acc_pos / len(eval_pos):.2f})")
-            click.echo(f"Accuracy on negative examples: {acc_neg}/{len(eval_neg)} ({acc_neg / len(eval_neg):.2f})")
+            if eval:
+                acc_pos = sum(algo.predict(e) for e in eval_pos)
+                acc_neg = sum(not algo.predict(e) for e in eval_neg)
+                click.echo(f"Accuracy on positive examples: {acc_pos}/{len(eval_pos)} ({acc_pos / len(eval_pos):.2f})")
+                click.echo(f"Accuracy on negative examples: {acc_neg}/{len(eval_neg)} ({acc_neg / len(eval_neg):.2f})")
 
 
 if __name__ == '__main__':

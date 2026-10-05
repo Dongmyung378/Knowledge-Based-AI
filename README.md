@@ -49,7 +49,7 @@ Install [Vampire](https://vprover.github.io/) and update `VAMPIRE_BIN` in `tools
 
 ```bash
 cd projects/automated-reasoning
-./tools/run_vampire --preset gc problems/maps.p
+sh ./tools/run_vampire --preset gc problems/maps.p
 ```
 
 ### 2. Logic programming
@@ -79,6 +79,12 @@ python -m pytest
 ```
 
 See the project README for a standard Python `venv` setup when SWI-Prolog is already installed on the system.
+
+On 2026-10-05, the symbolic-learning public suite passed 30 tests on Python 3.12.7
+and SWI-Prolog 9.2.9. The generated decision-tree smoke experiment and recursive
+graph hold-out evaluation also completed. See the [validated commands and version
+set](projects/symbolic-machine-learning/README.md#verified-smoke-experiments-2026-10-05).
+Vampire is needed only for the separate automated-reasoning workflow.
 
 ## Documentation
 

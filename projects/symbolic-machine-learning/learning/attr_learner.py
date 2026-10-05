@@ -180,8 +180,9 @@ def to_logic_expression(tree: Tree) -> AttrLogicExpression:
     # start the traversal from the root of the tree with an empty path
     conjunctions = traverse(tree, [])
     # wrap all gathered conjunctions in a Disjunction (OR of ANDs)
-    # if no positive paths were found, return a disjunction with an empty conjunction
-    return Disjunction(conjunctions=conjunctions) if conjunctions else Disjunction(conjunctions=[Conjunction(attribute_confs={})])
+    # No positive leaves means a constant False expression. A positive root leaf
+    # already produces an empty conjunction, which correctly represents True.
+    return Disjunction(conjunctions=conjunctions)
 
 # Register this learner under the name "dtl" for dynamic use
 @AlgorithmRegistry.register("dtl")

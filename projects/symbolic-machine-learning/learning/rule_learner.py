@@ -1,7 +1,7 @@
 import itertools
 import re
 import math
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Generator, Union
@@ -220,11 +220,35 @@ class _FOIL(Algorithm):
         # store whether recursive rules should be allowed in hypothesis generation
         self.recursive = recursive
         self.kb_path = Path(dataset.kb).resolve() if dataset.kb else None
+        self._prolog_kb_path = None
 
         # if a knowledge base file is provided, load it into Prolog
         if self.kb_path:
             logger.debug(f"Consulting {self.kb_path}")
-            self.prolog.consult(str(self.kb_path))
+            self.prolog.consult(self.kb_path.as_posix())
+            escaped_path = self.kb_path.as_posix().replace("'", "''")
+            # SWI canonicalizes Windows paths to lowercase. unload_file/1
+            # needs that source identifier, rather than Python's path spelling.
+            self._prolog_kb_path = next(self.prolog.query(
+                f"absolute_file_name('{escaped_path}', Canonical)."
+            ))['Canonical']
+        self._target = get_predicate(dataset.target) if dataset.target else None
+        if self.recursive and self._target:
+            indicator = f"{self._target.name}/{self._target.arity}"
+            # A learned recursive rule can revisit the same goal through a
+            # graph cycle. Tabling gives finite, set-valued answers for these
+            # finite relational fixtures, including failed reachability goals.
+            list(self.prolog.query(f"dynamic({indicator})."))
+            list(self.prolog.query(f"table({indicator})."))
+
+    def _invalidate_target_table(self):
+        # Ordinary tables do not track asserted/retracted clauses. Clear only
+        # this learner's target tables after changing its hypothesis.
+        if self.recursive and self._target:
+            arguments = ','.join('_' for _ in range(self._target.arity))
+            list(self.prolog.query(
+                f"abolish_table_subgoals({self._target.name}({arguments}))."
+            ))
 
     def abolish(self):
         # PySwip queries are lazy, so consume each cleanup query to make sure
@@ -233,15 +257,20 @@ class _FOIL(Algorithm):
         # Learned clauses are asserted dynamically and therefore have no
         # source-file property. Add the target explicitly so those clauses do
         # not leak into the next test or training run.
+        predicates = set(self.get_predicates())
         if self.dataset.target:
-            target = get_predicate(self.dataset.target)
-            list(self.prolog.query(f"abolish({target.name}/{target.arity})"))
+            predicates.add(get_predicate(self.dataset.target))
+        if self.recursive and self._target:
+            self._invalidate_target_table()
+            list(self.prolog.query(f"untable({self._target.name}/{self._target.arity})."))
+        for predicate in predicates:
+            list(self.prolog.query(f"abolish({predicate.name}/{predicate.arity})"))
 
         # Unloading the source file clears both its clauses and SWI-Prolog's
         # source metadata. Abolishing its predicates alone leaves enough state
         # behind to interfere with a different KB loaded later in this process.
-        if self.kb_path:
-            escaped_path = self.kb_path.as_posix().replace("'", "''")
+        if self._prolog_kb_path:
+            escaped_path = self._prolog_kb_path.replace("'", "''")
             list(self.prolog.query(f"unload_file('{escaped_path}')"))
 
     def predict(self, example: Example) -> bool:
@@ -268,7 +297,7 @@ class _FOIL(Algorithm):
                 # add it to the set to avoid duplicates
                 predicate_set.add(predicate)
         # return the unique predicates as a list
-        return list(predicate_set)
+        return sorted(predicate_set, key=lambda predicate: (predicate.name, predicate.arity))
 
     def find_hypothesis(self) -> Disjunction:
         """
@@ -314,6 +343,7 @@ class _FOIL(Algorithm):
             clauses.append(clause)
             # assert the clause into Prolog so it can be used during further reasoning (e.g., recursion)
             self.prolog.assertz(repr(clause))
+            self._invalidate_target_table()
             # remove all positive examples that are now covered by the new clause
             uncovered_pos = [e for e in uncovered_pos if not self.covers(clause, e)]
         # return the complete list of learned clauses
@@ -334,15 +364,18 @@ class _FOIL(Algorithm):
         query_str = repr(substituted_head)
         # assert the clause into Prolog so we can query it
         self.prolog.assertz(clause_str)
+        self._invalidate_target_table()
         try:
             # run the query and check whether it succeeds at least once
-            return next(self.prolog.query(query_str), None) is not None
+            with closing(self.prolog.query(query_str)) as query:
+                return next(query, None) is not None
         except Exception:
             # if an error occurs during query execution, return False
             return False
         finally:
             # always retract the clause after the query to clean up the Prolog environment
             self.prolog.retract(clause_str)
+            self._invalidate_target_table()
 
 
     def new_clause(self, positive_examples: Examples, negative_examples: Examples, predicates: List[Predicate],
@@ -418,26 +451,16 @@ class _FOIL(Algorithm):
         p0 = len(pos_ex)
         n0 = len(neg_ex)
         
-        # extend all positive examples with the new literal
-        pos_ext = []
-        for e in pos_ex:
-            pos_ext.extend(self.extend_example(e, candidate))
-        # extend all negative examples with the new literal
-        neg_ext = []
-        for e in neg_ex:
-            neg_ext.extend(self.extend_example(e, candidate))
-        
-        # filter out extended positive examples that still represent original positives
-        p1_ex = [ex for ex in pos_ext if any(is_represented_by(e, [ex]) for e in pos_ex)]
-        # same for negative examples
-        n1_ex = [ex for ex in neg_ext if any(is_represented_by(e, [ex]) for e in neg_ex)]
-        
-        # number of retained positive and negative examples after applying the candidate
-        p1 = len(p1_ex)
-        n1 = len(n1_ex)
-
-        # number of original positive examples covered by any of the extended positives
-        t = sum(1 for e in pos_ex if any(is_represented_by(e, [ex]) for ex in p1_ex))
+        # extend_example preserves every original binding. Count extensions
+        # while retaining their originating example, instead of rediscovering
+        # that relation with quadratic pairwise scans of the whole dataset.
+        p1 = 0
+        t = 0
+        for example in pos_ex:
+            count = sum(1 for _ in self.extend_example(example, candidate))
+            p1 += count
+            t += bool(count)
+        n1 = sum(1 for example in neg_ex for _ in self.extend_example(example, candidate))
 
         # edge cases: prevent divide-by-zero or meaningless log2
         if p1 + n1 == 0 or p0 + n0 == 0 or p1 == 0 or p0 == 0:
@@ -451,7 +474,8 @@ class _FOIL(Algorithm):
         # These candidates are created using known variables and optionally new ones.
 
         # Extract all distinct variables used so far in the clause
-        existing_vars = list(set(clause.get_vars()))
+        # Stable tie-breaking must not depend on Python's randomized set order.
+        existing_vars = list(dict.fromkeys(clause.get_vars()))
         
         for predicate in predicates:
             # skip recursive use of the target predicate unless explicitly allowed
