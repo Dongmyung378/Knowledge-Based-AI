@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "verification": "Independent graph oracle and paired FOIL report validation",
+  "source_reports_sha256": {
+    "foil-final-greedy.json": "b5e32a91125044139c1a3572b56beb3deb9411633db59041ba742deebf683018",
+    "foil-final-lookahead.json": "3d6e77190960aabdf4c16887c30476c66cbb134d38c11012bfbd5b254a367dbf"
+  },
+  "checks": {
+    "graph_cases": 60,
+    "oracle": "NetworkX transitive_closure(reflexive=True), independent of the benchmark queue-based BFS and Prolog learner",
+    "full_pair_partition_unique": true,
+    "same_inputs_and_splits_for_both_policies": true,
+    "common_completed_cases": 20,
+    "common_predictions_identical": true,
+    "all_worker_exit_codes_zero": true,
+    "all_worker_stderr_empty": true
+  },
+  "status": "passed"
+}

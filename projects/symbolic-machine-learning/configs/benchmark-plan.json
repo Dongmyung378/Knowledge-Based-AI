@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "plan_id": "symbolic-learning-controlled-v1",
+  "created_utc": "2026-10-15T05:07:00Z",
+  "families": ["conjunction", "sparse_dnf", "xor", "random_truth"],
+  "development": {"seeds": [0, 1, 2, 3, 4], "attributes": [8], "noise": [0.0, 0.3]},
+  "evaluation": {"seeds": [100, 101, 102, 103, 104, 105, 106, 107, 108, 109], "attributes": [8, 10], "noise": [0.0, 0.15, 0.3]},
+  "train_fraction": 0.6,
+  "validation_fraction": 0.2,
+  "depth_candidates": [2, 4, 6, "unlimited"],
+  "timing_repeats": 3,
+  "algorithms": ["majority", "dtl", "my-dtl", "corrected-dtl", "gain-ratio", "depth-limited", "gain-depth", "gain-depth-tuned", "pruned-dtl"],
+  "selection": {
+    "primary_metric": "validation_balanced_accuracy",
+    "representative_metric": "Outer development held-out balanced accuracy. Internal validation is used for depth selection and pruning; final evaluation seeds remain unseen until adoption is frozen.",
+    "tie_break": "fewest_nodes_then_shallowest_depth",
+    "representative_policy": "Use development means to select the corrected candidate; write adoption.json before evaluation. The final evaluation does not select settings.",
+    "optional_candidate_adoption": "Adopt only with at least 0.5 percentage point development validation balanced-accuracy improvement, or within 0.25 points with at least 20 percent fewer nodes. Correctness fixes are independently retained.",
+    "stop_rule": "One predeclared depth grid and one reduced-error-pruning candidate. No further candidate search without measured development benefit. Retain all initial and ablation results.",
+    "inference_candidate": "Compare retained-tree traversal with the equivalent DNF on complete valid Boolean inputs. Adopt only with identical predictions and at least 5 percent median batch-time reduction in development."
+  },
+  "scope": "Synthetic Boolean concepts. All algorithms share exact splits and training-only label flips. Validation selects settings. Clean held-out test examples are never used for fitting or pruning. Random-truth is an intentionally unstructured negative control, not a claim of learnable generalization."
+}

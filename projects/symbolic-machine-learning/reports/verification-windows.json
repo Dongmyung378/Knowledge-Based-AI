@@ -1,0 +1,218 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-15T05:39:56.603748+00:00",
+  "passed": true,
+  "environment": {
+    "python": "3.12.7",
+    "system": "Windows",
+    "machine": "AMD64",
+    "packages": {
+      "pyswip": "0.3.3",
+      "pytest": "9.1.1",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "click": "8.5.0",
+      "networkx": "3.7",
+      "tabulate": "0.10.0"
+    }
+  },
+  "source_sha256": {
+    "learning/attr_learner.py": "9f2c62f08d0348cc2b2f0da3a89b96a25d14f2ecf5fbbe3d393bdaeb4852f393",
+    "learning/rule_learner.py": "4077899473e6de6a1a1674d4d6f3cf5a82109d5c594bfe8f6f21d61d412d4031",
+    "evaluate_attributes.py": "4a6ad682608fe039d33673658f485c1a91e5d128c4822e792ad41621ecba6267",
+    "evaluate_rules.py": "201df10fbad1349983662d09a33d53e372c394eb55d6dbd93da5d994d8c303ca",
+    "tools/run_checks.py": "b6c35f98f65693c61ea580d1fe6e00cf4636f1b30616fc9b4e3c60a732c9eb7d",
+    "tools/check_environment.py": "d00755e9db29b1f5d2a06d0fab0cd1e3949c1a5be441c58f9d1b54c48a9b777c",
+    "tools/verify_release.py": "03fec2ac5c4e588517657a084d7cbffd56d9d2f9f5c56e8d33cbafdf86043e1e",
+    "requirements.lock.txt": "ff95a15c71ac1e3f7e576dce11aa6e34a751725cbf2e5f0f8ba4fae28929ace7",
+    "setup.cfg": "14034e24d26ffd934562b14d185a86cdeb4af96a1fab74ef2ae355828d1161ef"
+  },
+  "source_changed_files": [],
+  "stages": [
+    {
+      "name": "release",
+      "status": "passed",
+      "command": [
+        "python",
+        "-B",
+        "tools/verify_release.py",
+        "--project",
+        "."
+      ],
+      "timeout_seconds": 30,
+      "duration_seconds": 0.26944730000104755,
+      "exit_code": 0,
+      "timed_out": false,
+      "spawn_error": null,
+      "native_failure_patterns": [],
+      "stdout": "release.stdout.log",
+      "stderr": "release.stderr.log",
+      "stdout_bytes": 165,
+      "stderr_bytes": 0,
+      "checks": {
+        "schema_version": 1,
+        "passed": true,
+        "payload_files": 90,
+        "initial_source_files": 27,
+        "initial_git_commit": "aa947038f923e98ec0bf16457745d538284ef45c"
+      }
+    },
+    {
+      "name": "environment",
+      "status": "passed",
+      "command": [
+        "python",
+        "-B",
+        "tools/check_environment.py",
+        "--output",
+        "{output_dir}/environment.json"
+      ],
+      "timeout_seconds": 30,
+      "duration_seconds": 0.8000858000013977,
+      "exit_code": 0,
+      "timed_out": false,
+      "spawn_error": null,
+      "native_failure_patterns": [],
+      "stdout": "environment.stdout.log",
+      "stderr": "environment.stderr.log",
+      "stdout_bytes": 792,
+      "stderr_bytes": 0,
+      "checks": {
+        "passed": true,
+        "checks": {
+          "python_supported": true,
+          "dependencies_installed": true,
+          "swipl_cli": true,
+          "pyswip_query": true
+        },
+        "swi_prolog_version": "9.2.9"
+      }
+    },
+    {
+      "name": "pytest",
+      "status": "passed",
+      "command": [
+        "python",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/public",
+        "-q",
+        "--capture=sys",
+        "--basetemp",
+        "{output_dir}/pytest-tmp",
+        "-o",
+        "cache_dir={output_dir}/pytest-cache",
+        "--junitxml",
+        "{output_dir}/pytest-junit.xml",
+        "-o",
+        "junit_logging=all"
+      ],
+      "timeout_seconds": 120,
+      "duration_seconds": 16.537809500001458,
+      "exit_code": 0,
+      "timed_out": false,
+      "spawn_error": null,
+      "native_failure_patterns": [],
+      "stdout": "pytest.stdout.log",
+      "stderr": "pytest.stderr.log",
+      "stdout_bytes": 1411,
+      "stderr_bytes": 0,
+      "checks": {
+        "tests": 153,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 2,
+        "passed": 151
+      }
+    },
+    {
+      "name": "dtl_smoke",
+      "status": "passed",
+      "command": [
+        "python",
+        "-B",
+        "evaluate_attributes.py",
+        "eval-size",
+        "-a",
+        "dtl",
+        "-a",
+        "my-dtl",
+        "-s",
+        "4",
+        "-d",
+        "2",
+        "-t",
+        "0.75",
+        "-r",
+        "42"
+      ],
+      "timeout_seconds": 30,
+      "duration_seconds": 1.972599500000797,
+      "exit_code": 0,
+      "timed_out": false,
+      "spawn_error": null,
+      "native_failure_patterns": [],
+      "stdout": "dtl_smoke.stdout.log",
+      "stderr": "dtl_smoke.stderr.log",
+      "stdout_bytes": 528,
+      "stderr_bytes": 0,
+      "checks": {
+        "dtl": {
+          "correct": 4,
+          "examples": 4
+        },
+        "my-dtl": {
+          "correct": 4,
+          "examples": 4
+        }
+      }
+    },
+    {
+      "name": "foil_smoke",
+      "status": "passed",
+      "command": [
+        "python",
+        "-B",
+        "evaluate_rules.py",
+        "-a",
+        "foil",
+        "-d",
+        "tests/graph_small.json",
+        "-k",
+        "tests/graph_small.pl",
+        "-t",
+        "reachable(X,Y)",
+        "-r",
+        "-e",
+        "0.8",
+        "-s",
+        "42",
+        "--max-seconds",
+        "20",
+        "--output-json",
+        "{output_dir}/foil-smoke.json"
+      ],
+      "timeout_seconds": 30,
+      "duration_seconds": 2.4614723999984562,
+      "exit_code": 0,
+      "timed_out": false,
+      "spawn_error": null,
+      "native_failure_patterns": [],
+      "stdout": "foil_smoke.stdout.log",
+      "stderr": "foil_smoke.stderr.log",
+      "stdout_bytes": 258,
+      "stderr_bytes": 0,
+      "checks": {
+        "positive_examples": 12,
+        "negative_examples": 59,
+        "correct": 71,
+        "swi_prolog_version_number": 90209
+      }
+    }
+  ],
+  "command_path_scope": "Project-relative source paths; {output_dir} is the selected evidence folder.",
+  "scope": "Checks the current environment and fixed smoke examples; not every input or independent hardware.",
+  "tested_archive_sha256": "bfb6cd196e54aa430bbc257f586f5e0870f8475022d38485ad5fa6e72281cb22",
+  "artifact_scope": "Actual extracted source-candidate.zip in a separate Python virtual environment. Final documentation and evidence additions do not change the nine verified source/configuration files."
+}

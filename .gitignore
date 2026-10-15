@@ -7,6 +7,9 @@ __pycache__/
 .venv/
 venv/
 
+# User-generated symbolic-learning runs. Curated reports remain tracked.
+projects/symbolic-machine-learning/outputs/
+
 # Coverage and packaging
 .coverage
 htmlcov/

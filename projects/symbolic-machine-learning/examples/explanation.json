@@ -1,0 +1,240 @@
+{
+  "schema_version": 1,
+  "purpose": "Explanatory demonstration fitted to all eight Boolean inputs; not a held-out performance measurement.",
+  "concept": "(A AND B) OR C",
+  "algorithm": "gain-depth",
+  "max_depth": 3,
+  "training_rows": [
+    {
+      "A": false,
+      "B": false,
+      "C": false,
+      "target": false
+    },
+    {
+      "A": false,
+      "B": false,
+      "C": true,
+      "target": true
+    },
+    {
+      "A": false,
+      "B": true,
+      "C": false,
+      "target": false
+    },
+    {
+      "A": false,
+      "B": true,
+      "C": true,
+      "target": true
+    },
+    {
+      "A": true,
+      "B": false,
+      "C": false,
+      "target": false
+    },
+    {
+      "A": true,
+      "B": false,
+      "C": true,
+      "target": true
+    },
+    {
+      "A": true,
+      "B": true,
+      "C": false,
+      "target": true
+    },
+    {
+      "A": true,
+      "B": true,
+      "C": true,
+      "target": true
+    }
+  ],
+  "tree": {
+    "attribute": "C",
+    "branches": {
+      "false": {
+        "attribute": "A",
+        "branches": {
+          "false": {
+            "prediction": false
+          },
+          "true": {
+            "attribute": "B",
+            "branches": {
+              "false": {
+                "prediction": false
+              },
+              "true": {
+                "prediction": true
+              }
+            }
+          }
+        }
+      },
+      "true": {
+        "prediction": true
+      }
+    }
+  },
+  "dnf": " C = False AND A = True AND B = True\nOR\n C = True",
+  "logic_terms": [
+    {
+      "C": false,
+      "A": true,
+      "B": true
+    },
+    {
+      "C": true
+    }
+  ],
+  "complexity": {
+    "depth": 3,
+    "nodes": 7,
+    "leaves": 4,
+    "positive_rules": 2,
+    "literals": 4
+  },
+  "examples": [
+    {
+      "input": {
+        "A": false,
+        "B": false,
+        "C": false
+      },
+      "path": [
+        {
+          "attribute": "C",
+          "value": false
+        },
+        {
+          "attribute": "A",
+          "value": false
+        }
+      ],
+      "prediction": false
+    },
+    {
+      "input": {
+        "A": false,
+        "B": false,
+        "C": true
+      },
+      "path": [
+        {
+          "attribute": "C",
+          "value": true
+        }
+      ],
+      "prediction": true
+    },
+    {
+      "input": {
+        "A": false,
+        "B": true,
+        "C": false
+      },
+      "path": [
+        {
+          "attribute": "C",
+          "value": false
+        },
+        {
+          "attribute": "A",
+          "value": false
+        }
+      ],
+      "prediction": false
+    },
+    {
+      "input": {
+        "A": false,
+        "B": true,
+        "C": true
+      },
+      "path": [
+        {
+          "attribute": "C",
+          "value": true
+        }
+      ],
+      "prediction": true
+    },
+    {
+      "input": {
+        "A": true,
+        "B": false,
+        "C": false
+      },
+      "path": [
+        {
+          "attribute": "C",
+          "value": false
+        },
+        {
+          "attribute": "A",
+          "value": true
+        },
+        {
+          "attribute": "B",
+          "value": false
+        }
+      ],
+      "prediction": false
+    },
+    {
+      "input": {
+        "A": true,
+        "B": false,
+        "C": true
+      },
+      "path": [
+        {
+          "attribute": "C",
+          "value": true
+        }
+      ],
+      "prediction": true
+    },
+    {
+      "input": {
+        "A": true,
+        "B": true,
+        "C": false
+      },
+      "path": [
+        {
+          "attribute": "C",
+          "value": false
+        },
+        {
+          "attribute": "A",
+          "value": true
+        },
+        {
+          "attribute": "B",
+          "value": true
+        }
+      ],
+      "prediction": true
+    },
+    {
+      "input": {
+        "A": true,
+        "B": true,
+        "C": true
+      },
+      "path": [
+        {
+          "attribute": "C",
+          "value": true
+        }
+      ],
+      "prediction": true
+    }
+  ]
+}

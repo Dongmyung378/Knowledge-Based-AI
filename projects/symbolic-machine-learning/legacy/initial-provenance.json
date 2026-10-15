@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "source_basis": "Canonical Git blob bytes at the pinned initial commit, independent of platform line-ending filters.",
+  "git_commit": "aa947038f923e98ec0bf16457745d538284ef45c",
+  "snapshot": "legacy/initial-aa947038.zip",
+  "sha256": "8dddfb516c28fc46d90eed7ce77cb9ea2fd6f1b3db71bd3815ee6577ec4f6477",
+  "files": [
+    {
+      "path": "README.ko.md",
+      "sha256": "419020979ab694f7bc13260886c64a83d99ad9f576ce254db98b03df7a8b5923"
+    },
+    {
+      "path": "README.md",
+      "sha256": "d960214af3b0e5e50d47fffa2ef365fc1b577dd75ea39584217737af64e6b9fd"
+    },
+    {
+      "path": "docs/evaluation-guide.ko.md",
+      "sha256": "47349d8728f4cf47335ac0b5ddbbd03620765db24badd4f4ebead19be5e17317"
+    },
+    {
+      "path": "docs/evaluation-guide.md",
+      "sha256": "d1678a3af60ad1a76ecfa6e1236c06cec4d2c5659e217bbc4b963b57b715b9fe"
+    },
+    {
+      "path": "docs/experiment-report.ko.md",
+      "sha256": "c5e5318222ba2f99e033dc52710e839345cab4c14573c49e7fe527a6e3735ce2"
+    },
+    {
+      "path": "docs/experiment-report.md",
+      "sha256": "55573c4a780f2832223b77d465816a9dc2047c03b3a4eaae7b6c94613a4effa8"
+    },
+    {
+      "path": "evaluate_attributes.py",
+      "sha256": "bf5545ef667f48c9f0bb87da276f04e1129089c0b5ceb8ab8e4a8e2b57c49f75"
+    },
+    {
+      "path": "evaluate_rules.py",
+      "sha256": "a364592831ecc4a03c9f6aa995a5e95c0f14977d1a7ed3d47557013fde3b122c"
+    },
+    {
+      "path": "generate_graphs.py",
+      "sha256": "58d77771bd896a724985666f8705522891b94d890369a6f8d29486ea0b258ebf"
+    },
+    {
+      "path": "learning/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "learning/attr_learner.py",
+      "sha256": "994875307a84fa9f796a3d8b64f8a46ee25b509be6451bcd5e8805d1209ab4af"
+    },
+    {
+      "path": "learning/generate.py",
+      "sha256": "687f6d57ba27d193e882e4468e97c13def7ee31bab2560095b9b908e89ba3b8a"
+    },
+    {
+      "path": "learning/rule_learner.py",
+      "sha256": "12add75222fb7dfa0cf59a894a005554da314c44718fbbdc5731640dfd19539a"
+    },
+    {
+      "path": "learning/util.py",
+      "sha256": "b171e97d40eb8b8206e6ea64b645cc7bbc2ae72f2195c1e7cd806f786b812ebb"
+    },
+    {
+      "path": "references/lab3.pdf",
+      "sha256": "f71313ee92fd1f20f49bb622d84a3d6905178dc1a53356d8844e20113d18b934"
+    },
+    {
+      "path": "references/lecture15.pdf",
+      "sha256": "19f6569a2c8926f06b79fc9ac2b182ee8972a9034ce67fc68e869e722d0799c6"
+    },
+    {
+      "path": "references/lecture16.pdf",
+      "sha256": "d60d26a9d5a3157d0b4d8a30bd238d7e0a4b2dc684108e769f4b85e4f417aa77"
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "0e1e36de9c99c55093d8ce7e88ad8bbfe7b146245159ea925bfe1d6b4c84ff0e"
+    },
+    {
+      "path": "setup.cfg",
+      "sha256": "856e07e0f31ee3205d79e36620fe99f83fbfd36a456615aa8c4d7c385ba9db1f"
+    },
+    {
+      "path": "tests/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tests/graph.json",
+      "sha256": "56320296a55d5cc459adf6573f42767cfcffce471c52d5f852fe863ba119281f"
+    },
+    {
+      "path": "tests/graph.pl",
+      "sha256": "e702d0744b9a5f6dac3a6e273966db125467c5efe4879545d3f6fe2c191263b9"
+    },
+    {
+      "path": "tests/graph_small.json",
+      "sha256": "a365ed3df39236a6710026baafefcbfc38f203df8d1f97ace01b9bc3da109018"
+    },
+    {
+      "path": "tests/graph_small.pl",
+      "sha256": "8bcda4c063a865fc764216446d12d3e7453ef4c04936bd5caa9e20b662081a4b"
+    },
+    {
+      "path": "tests/public/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tests/public/test_attr_learner.py",
+      "sha256": "608bafd8dbbffbef28f27c1ca6adbd50b57ecd79c976ad7e103d5e0ccda2f9b4"
+    },
+    {
+      "path": "tests/public/test_evaluation.py",
+      "sha256": "e20e1115d78e2e5fbbbb1e95b18a303a182ea4fa0b6829739643724cf53a7f8a"
+    },
+    {
+      "path": "tests/public/test_rule_learner.py",
+      "sha256": "958461c8beeafb12c063980ddaebe8fae1923b386adc22ddda0252e90538930f"
+    },
+    {
+      "path": "tests/test_kb.pl",
+      "sha256": "b82fcd90c2b8f86990dfe088efea29ad8f5101a9a623244394b5d365aff3d275"
+    },
+    {
+      "path": "tests/test_kb2.pl",
+      "sha256": "824d6b58413f8e4df0cfd51cb808defcec526b69f3e7ef0d884993e1528fc8ed"
+    }
+  ],
+  "snapshot_file_count": 27,
+  "shared_reference_files": [
+    {
+      "path": "references/lab3.pdf",
+      "sha256": "f71313ee92fd1f20f49bb622d84a3d6905178dc1a53356d8844e20113d18b934"
+    },
+    {
+      "path": "references/lecture15.pdf",
+      "sha256": "19f6569a2c8926f06b79fc9ac2b182ee8972a9034ce67fc68e869e722d0799c6"
+    },
+    {
+      "path": "references/lecture16.pdf",
+      "sha256": "d60d26a9d5a3157d0b4d8a30bd238d7e0a4b2dc684108e769f4b85e4f417aa77"
+    }
+  ],
+  "scope": "Byte-exact initial code, historical experiment reports and other text payloads. The three unchanged reference PDFs are stored once in the current references directory and identified in shared_reference_files; the complete initial tracked inventory remains in files.",
+  "previous_verification": "User-confirmed third-party verification of the initial version is retained. Additional verification covers the new implementation and experiments."
+}

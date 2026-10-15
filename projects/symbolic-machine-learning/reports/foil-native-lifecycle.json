@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "verification": "FOIL native context lifecycle and process exit",
+  "environment": {
+    "python": "3.12.7",
+    "system": "Windows",
+    "swi_prolog": "9.2.9",
+    "pyswip": "0.3.3"
+  },
+  "source_sha256": {
+    "learning/rule_learner.py": "4077899473e6de6a1a1674d4d6f3cf5a82109d5c594bfe8f6f21d61d412d4031",
+    "tests/public/test_foil_boundaries.py": "c61aff7348e5d00dbb4e218f915b1b1bb243220abe3f0d6f85493d034720eb1f"
+  },
+  "protocol": {
+    "condition": "An unused recursive FOIL context closes, then two full graph_small training and all-positive/all-negative prediction contexts run in the same fresh process.",
+    "repetitions": 8,
+    "native_cleanup_disabled": false,
+    "required_exit_code": 0,
+    "required_stderr": "",
+    "equivalent_public_regression": "tests/public/test_foil_boundaries.py::test_empty_recursive_context_then_repeated_full_learning_has_clean_native_exit",
+    "scope": "Same Windows machine, eight fresh Python processes; not independent-machine certification."
+  },
+  "records": [
+    {
+      "iteration": 0,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "iteration": 1,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "iteration": 2,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "iteration": 3,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "iteration": 4,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "iteration": 5,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "iteration": 6,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "iteration": 7,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    }
+  ],
+  "summary": {
+    "processes": 8,
+    "normal_exits": 8,
+    "empty_stderr": 8
+  }
+}

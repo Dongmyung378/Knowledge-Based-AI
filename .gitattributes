@@ -1,0 +1,8 @@
+*.pdf binary
+*.png binary
+*.zip binary
+README.md text eol=lf
+README.ko.md text eol=lf
+.github/** text eol=lf
+# Release manifests hash actual payload bytes, including on Windows clones.
+projects/symbolic-machine-learning/** -text

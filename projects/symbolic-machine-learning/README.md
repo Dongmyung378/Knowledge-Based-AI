@@ -2,206 +2,142 @@
 
 [English](README.md) | [한국어](README.ko.md) | [Portfolio home](../../README.md)
 
-## Overview
+Two learning systems implemented from first principles: a decision-tree learner that turns attribute-value examples into readable logical expressions, and a FOIL-style learner that induces relational Horn clauses from examples and a Prolog knowledge base.
 
-This project implements two explainable learning systems from first principles:
+The original development period was **February–May 2025**. The maintained release preserves the initial algorithms and experiments, adds exact path-depth and validation-pruned tree variants, separates model selection from final testing, and gives relational search explicit failure and runtime budgets.
 
-1. A decision-tree learner for attribute-value data, including conversion from a tree to a disjunction of logical conjunctions.
-2. A FOIL-style inductive logic programming learner that induces Horn clauses from positive examples, negative examples, and a Prolog knowledge base.
+## What this project demonstrates
 
-It also includes dataset generators, command-line evaluation tools, graph fixtures, and public tests.
+- Entropy, information gain, gain ratio and symbolic tree-to-logic conversion.
+- Capacity control through exact root-to-leaf depth and reduced-error pruning.
+- FOIL candidate generation, relational example extension, rule induction and recursive finite-graph inference.
+- Paired experimental inputs, held-out evaluation and inspectable prediction traces.
+- Runtime discovery, source integrity checks and preserved initial evidence.
 
-## Technical highlights
+The original coursework supplied the code skeleton, dataset generation utilities, evaluation scaffolding and public tests. The implemented learning logic and subsequent maintenance are distinguished from those supplied materials. Original assignment and lecture PDFs remain under [`references/`](references/).
 
-### Decision-tree learning
+## Learning approaches
 
-- Handles unanimous targets, plurality fallbacks, empty partitions, and exhausted attributes.
-- Computes binary entropy and information gain for attribute selection.
-- Converts positive root-to-leaf paths into human-readable logical expressions.
-- Registers algorithms by name so evaluation scripts can compare implementations consistently.
+| Name | Split criterion | Growth control | Purpose |
+| --- | --- | --- | --- |
+| `dtl` | Information gain | Initial implementation | Preserved comparison baseline |
+| `my-dtl` | Gain ratio | Initial shared post-order counter | Preserved historical variant |
+| `corrected-dtl` | Information gain | Unlimited by default | Maintained deterministic, schema-validated baseline |
+| `gain-ratio` | Gain ratio | Unlimited by default | Isolate split-criterion effects |
+| `depth-limited` | Information gain | Exact path depth | Isolate depth-control effects |
+| `gain-depth` | Gain ratio | Exact path depth | Combine the two changes |
+| `pruned-dtl` | Information gain | Validation-based reduced-error pruning | Test complexity reduction after fitting |
+| `foil` | FOIL information gain | Explicit search and query budgets | Learn relational Horn clauses |
 
-### Improved `my-dtl` variant
+`my-dtl` retains the initial shared-counter behaviour. It is not silently relabelled as a correct per-path depth limiter. The corrected variants are separately registered so readers can compare the actual mechanisms. The initial [`experiment-report.md`](docs/experiment-report.md) is an unchanged historical record; phrases such as "current implementation" in that report refer to its initial snapshot.
 
-- Uses gain ratio to normalise information gain by split information.
-- Limits tree depth using the size of the training set.
-- Trades some predictive accuracy for lower training time and improved behaviour in selected high-noise settings.
-- Documents both successful and unsuccessful experimental outcomes in the [experiment report](docs/experiment-report.md).
+## Quick start
 
-### FOIL-style rule learning
-
-- Extracts usable predicates from a Prolog knowledge base.
-- Generates candidate literals with consistent variable naming.
-- Extends examples through Prolog substitutions and scores candidates with FOIL information gain.
-- Learns Horn clauses through separate covering and specialisation loops.
-- Supports recursive target relations such as graph reachability.
-- Unloads the consulted knowledge base and learned target predicates when a learner closes, preventing Prolog state from leaking across runs.
-
-## Architecture
-
-```text
-symbolic-machine-learning/
-├── learning/
-│   ├── attr_learner.py   # DTL, my-dtl, entropy, and logic conversion
-│   ├── rule_learner.py   # FOIL, Horn-clause types, and Prolog bridge
-│   ├── generate.py       # Synthetic attribute dataset generator
-│   └── util.py           # Dataset, algorithm interface, and registry
-├── tests/
-│   ├── public/           # Attribute and rule learner tests
-│   └── graph*            # Reachability datasets and Prolog facts
-├── evaluate_attributes.py
-├── evaluate_rules.py
-├── generate_graphs.py
-├── docs/
-│   ├── experiment-report.md
-│   └── evaluation-guide.md
-└── references/           # Original brief and lecture material
-```
-
-## Setup
-
-### Prerequisites
-
-- Python 3.12 recommended (the validation environment used 3.12.7)
-- SWI-Prolog available on `PATH`
-- Git, needed by the pinned PySwip source dependency
-- A C/C++ toolchain only if required by your local dependency installation
+Use Python 3.12 with **SWI-Prolog 9.2.9 x64 on Windows** or the **9.0.4 system package on Ubuntu 24.04**. SWI-Prolog must be discoverable by PySwip; it is not installed by `pip`. Git is required to install the pinned PySwip source dependency. The [reproduction guide](docs/reproduce.md) links the exact Windows installer and its hash.
 
 ```bash
 cd projects/symbolic-machine-learning
 python -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
 ```
 
-On Windows PowerShell, activate the environment with:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-PySwip must be able to locate the installed SWI-Prolog runtime. For an extracted
-Windows runtime without installer registration, set `SWI_HOME_DIR` to its root and
-`LIBSWIPL_PATH` to the absolute path of `bin/libswipl.dll`, and add its `bin` directory
-to the current process's `PATH` before running Python. These paths are machine-local;
-do not commit them.
-
-### Ubuntu or Debian system runtime
-
-Install SWI-Prolog and Python's environment support, then run the standard `venv`
-setup above from `projects/symbolic-machine-learning`:
+Activate with `source .venv/bin/activate` on Linux/WSL or `.\.venv\Scripts\Activate.ps1` on Windows PowerShell, then run:
 
 ```bash
-sudo apt-get update
-sudo apt-get install -y swi-prolog python3-venv
-python3 --version
-swipl --version
+python -m pip install -r requirements.lock.txt
+python tools/run_checks.py --output-dir outputs/verification
 ```
 
-Use a Python 3.12 environment for the validated version set below; older system
-Python versions may resolve different dependency releases. The Conda option supplies
-the specific Python and SWI-Prolog versions together.
+The lock file pins PySwip to commit `c07e8083c6a58eb7de99bb26c8dc89a0c215f52c` and records the resolved Python dependency versions. The environment checker executes an actual isolated Prolog query and returns a nonzero status with hints if the native runtime cannot load. See [installation and reproduction](docs/reproduce.md) for Linux and Windows discovery details.
 
-### Self-contained Conda setup for Linux or WSL
+The guarded check command verifies the release, diagnoses the environment, runs pytest and both fixed learning smoke workflows, and checks native process shutdown. Choose a new or empty output directory; existing evidence is not overwritten.
 
-This alternative keeps Python and SWI-Prolog together in the ignored `.venv` directory:
+## Run the workflows
 
-```bash
-conda create -p .venv -c conda-forge python=3.12 swi-prolog=9.2.9 pip -y
-conda activate ./.venv
-python -m pip install -r requirements.txt
-```
-
-## Tests
-
-```bash
-python -m pytest
-```
-
-Run only the decision-tree tests:
-
-```bash
-python -m pytest tests/public/test_attr_learner.py
-```
-
-Run only the rule-learning tests:
-
-```bash
-python -m pytest tests/public/test_rule_learner.py
-```
-
-The regression suite checks learning and prediction before FOIL cleanup, and loading
-different knowledge bases in the same process. Keep prediction inside `with FOIL(...)`
-when using the learner directly; leaving the context removes its learned target and
-unloads the knowledge base. Record Python, PySwip and SWI-Prolog versions if a runtime
-problem occurs.
-
-## Reproduce the evaluations
-
-Start from this directory after installing the dependencies. A small decision-tree
-experiment generates 16 Boolean examples, trains both learners on 75%, and reports
-accuracy on the remaining examples:
+The original command interfaces remain available:
 
 ```bash
 python evaluate_attributes.py eval-size -a dtl -a my-dtl -s 4 -d 2 -t 0.75
-```
-
-The seed defaults to 42. Inputs are generated in memory, so no private dataset or
-download is required. The rule-learning command below uses the tracked JSON examples
-and Prolog facts, prints its learned clauses, then reports positive and negative
-hold-out accuracy before cleaning up the Prolog state. These commands write results
-to the terminal; they do not save a model or alter the input fixtures.
-
-Compare decision-tree variants on noisy data:
-
-```bash
-python evaluate_attributes.py eval-noisy -a dtl -a my-dtl -c 0.3 -c 0.5 -c 0.7 -s 10 -d 10
-```
-
-Compare training time:
-
-```bash
-python evaluate_attributes.py eval-time -a dtl -a my-dtl -s 5 -s 7 -s 10
-```
-
-Learn a recursive reachability relation:
-
-```bash
 python evaluate_rules.py -a foil -d tests/graph_small.json -k tests/graph_small.pl -t "reachable(X,Y)" -r -e 0.8
 ```
 
-See the [evaluation guide](docs/evaluation-guide.md) for all workflows.
+The maintained attribute CLI corrects the initial evaluation protocol: `eval-noisy` now uses a clean independent hold-out, training-only label flips and a shared concept/split across algorithms and noise levels. `eval-time` shares pre-generated inputs and rotates execution order. The initial report's commands reproduce the old protocol only from the preserved snapshot, not from this maintained CLI. `pruned-dtl` requires a separate validation set and is supported by the controlled benchmark rather than these simple attribute commands.
 
-### Verified smoke experiments (2026-10-05)
+The maintained comparison has a checked-in plan and separate development and evaluation phases:
 
-The full public suite passed **30 tests** on Windows with Python 3.12.7, SWI-Prolog
-9.2.9 and PySwip 0.3.3 at commit
-`c07e8083c6a58eb7de99bb26c8dc89a0c215f52c`. The installed dependency versions were
-pytest 9.1.1, SciPy 1.18.1, Click 8.5.0, NetworkX 3.7, tabulate 0.10.0 and NumPy 2.5.3.
+```bash
+python tools/benchmark_attributes.py --plan configs/benchmark-plan.json --phase development --output outputs/attribute-development.json
+python tools/benchmark_attributes.py --plan configs/benchmark-plan.json --phase evaluation --output outputs/attribute-evaluation.json
+python tools/benchmark_foil.py --lookahead 2 --seed-start 200 --output outputs/foil-final-lookahead.json
+```
 
-- The small attribute command above finished with `dtl` and `my-dtl` each correctly
-  classifying 4/4 hold-out examples.
-- The recursive graph command above finished with 12/12 positive and 59/59 negative
-  hold-out examples classified correctly, using its default seed of 42.
-- Regressions cover constant positive/negative trees, mixed tree branches, FOIL
-  evaluation before cleanup, sequential knowledge bases and stale table removal.
+Algorithms receive the same generated concept, examples, split and training-label corruption within a condition. Validation selects capacity before final test predictions are inspected. Reports retain seeds, predictions, model complexity and timings; aggregate accuracy alone is insufficient to explain a trade-off.
 
-Recursive targets use [SWI-Prolog tabling](https://www.swi-prolog.org/pldoc/man?section=tabling)
-to avoid revisiting graph cycles. Target tables are cleared when learned clauses
-change and removed during cleanup. This covers the finite relational graph fixtures;
-it does not promise termination for arbitrary Prolog programs with unbounded terms.
-The Linux/WSL installation instructions are provided as alternatives and were not
-executed in this Windows validation. Vampire is a separate optional reasoning workflow
-and was not part of these tests. Historical performance experiments were not rerun.
+The benchmark compares nine conditions: the seven registered tree learners plus a majority-class predictor and `gain-depth-tuned`, which chooses a depth on the inner validation split. Candidate policies are selected on separate outer development hold-outs and frozen before running the distinct evaluation seeds.
 
-The supported dataset paths are generated attribute examples and JSON graph examples
-paired with Prolog facts. `Dataset.from_csv()` and `Dataset.to_csv()` remain unused
-coursework placeholders; CSV import/export is outside the runnable evaluation scope.
+## Inspect predictions
 
-## Results and limitations
+Open [`demo/index.html`](demo/index.html) directly in a browser for the offline interactive explanation. Change A, B and C, follow the exported learned tree and compare its result with the exported DNF. The model was trained on all eight inputs for explanation; the demo is not a held-out score. Rebuild both language versions with `python tools/build_demo.py`.
 
-The recorded experiments show that `my-dtl` trains substantially faster than the baseline and is more robust in one extreme-noise configuration. It also performs worse in several low-noise and limited-data settings. These are historical coursework measurements and were not rerun as part of the portfolio reorganisation. Full tables, commands, interpretation, and threats to validity are in the [experiment report](docs/experiment-report.md).
+Maintained tree variants expose `tree_`, `tree_metrics()` and `trace(example)`. Depth counts edges, so a root leaf has depth zero. Metrics include nodes, leaves, positive rules and literals. The path trace identifies the conditions used for one prediction. Features missing at prediction time and categories never observed during training raise explicit errors in these variants.
 
-`requirements.txt` pins PySwip to the tested commit. Other dependencies remain
-unversioned; use the version set recorded above when comparing this smoke result,
-and record your resolved versions for new experiments.
+FOIL prediction belongs inside its context manager, before its knowledge base and target are removed:
+
+```python
+with FOIL(dataset=dataset, recursive=True) as learner:
+    learner.fit()
+    print(learner.hypothesis)
+    print(learner.predict_with_trace(example))
+```
+
+The trace identifies matching learned clauses and input bindings; it is not a complete Prolog proof tree. Candidate exhaustion, budget exhaustion, query failures and cleanup failures are distinguishable. See [architecture and supported scope](docs/architecture.md).
+
+## Results and initial records
+
+<span id="verified-smoke-experiments-2026-10-05"></span>
+
+| Maintained evaluation | Result |
+| --- | --- |
+| Frozen representative balanced accuracy | **76.25%**, initial `my-dtl` **64.08%**, **+12.17 pp** |
+| Nine comparison conditions | **240 cases**, **2,160 model evaluations**, zero model failures |
+| Highest final balanced accuracy | `pruned-dtl` **77.81%**; kept available without changing the frozen representative |
+| Equivalent DNF/tree prediction | **12,288/12,288 identical**, median case-level batch-time reduction **68.31%** |
+| FOIL learning completed | Greedy **20/30** cases, optional two-literal look-ahead **26/30** |
+| Source ZIP verification | **5/5 stages** on Windows and Linux; Windows **151 passed, two skipped**, Linux **153 passed** |
+
+Read the [complete maintained results](docs/results.md) for all nine conditions, complexity and tuning costs, seed-level intervals and FOIL budget failures. The representative was fixed from development data before final evaluation. The initial experiment's lower training time is not reused as a speed claim for the new model.
+
+![All nine held-out balanced-accuracy comparison conditions](figures/en/symbolic-accuracy.svg)
+
+The historical coursework reported **44–80% lower training time** in three configurations and **+19.1 percentage points** in one extreme-noise setting, with substantial accuracy regressions elsewhere. Those measurements used the initial shared-counter variant. The noise evaluation included examples used for training, so these figures are not presented as new held-out generalisation results.
+
+The initial public smoke verification on **2026-10-05** passed 30 tests with Python 3.12.7 and SWI-Prolog 9.2.9. It also completed a 4/4 attribute hold-out example and a graph hold-out with 12/12 positive and 59/59 negative predictions. This is preserved prior verification, separate from the maintained release's new experiments.
+
+The original code, tests, recorded experiments and data are preserved as 27 byte-identical files in [`legacy/initial-aa947038.zip`](legacy/initial-aa947038.zip), pinned to Git commit `aa947038f923e98ec0bf16457745d538284ef45c`. The three original reference PDFs remain unchanged under [`references/`](references/) instead of being duplicated in that snapshot. [`legacy/initial-provenance.json`](legacy/initial-provenance.json) inventories all 30 initial files and identifies the shared reference hashes. The release manifest checks the snapshot and the shared PDFs. Historical reports and reference files also remain unchanged in the maintained tree.
+
+## Repository map
+
+```text
+symbolic-machine-learning/
+├── learning/               # Initial learners and maintained variants
+├── tests/                  # Regression checks and graph fixtures
+├── configs/                # Checked-in experimental plan
+├── tools/                  # Benchmarks, environment and release checks
+├── docs/                   # English-first documentation and Korean counterparts
+├── legacy/                 # Pinned initial project snapshot
+├── references/             # Original assignment and lecture material
+├── requirements.lock.txt   # Resolved Python package versions
+└── release-manifest.json   # Declared payload hashes and source provenance
+```
+
+## Documentation and limits
+
+- [Architecture and supported workflows](docs/architecture.md)
+- [Maintained results and all comparison conditions](docs/results.md)
+- [Executed environments and native lifecycle verification](docs/validation.md)
+- [Installation, experiments and release verification](docs/reproduce.md)
+- [Initial experiment report](docs/experiment-report.md)
+- [Initial evaluation guide](docs/evaluation-guide.md)
+
+The executable scope is generated categorical examples and finite relational datasets with Prolog facts. The unused coursework CSV import/export placeholders remain outside that scope. Synthetic results do not establish performance on external or production datasets. Timings depend on the execution environment. Tabling and budgets support controlled finite-graph experiments; they do not sandbox arbitrary Prolog source or prove termination of every program.
+
+The Ubuntu GitHub Actions workflow provides an execution path for the environment diagnostic, release verifier and regression suite. Its presence alone does not establish that a remote CI run passed. The repository does not declare a new licence for the code or supplied course materials.

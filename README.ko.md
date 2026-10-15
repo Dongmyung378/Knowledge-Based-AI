@@ -18,7 +18,7 @@ COMP24412에서 수행한 세 프로젝트를 자동 정리 증명, 논리 프�
 - 호환성, 중첩 실드, 부품 사용 여부, 구조 제약을 검사하는 재귀 Prolog 술어를 구현했습니다.
 - 결정 트리 학습기를 구현하고 학습한 트리를 읽을 수 있는 논리식으로 변환했습니다.
 - Prolog 지식 베이스를 활용하는 FOIL 방식의 귀납 논리 프로그래밍 학습기를 구현했습니다.
-- 이득비와 깊이 제한을 사용하는 `my-dtl`을 개발했습니다. 기존 과제 실험 기록에서는 학습 시간이 44-80% 감소했고 특정 고잡음 조건에서 정확도가 19.1%p 향상되었습니다. 저잡음 및 소규모 학습 데이터에서 발생한 성능 저하도 함께 기록했습니다.
+- 초기 `dtl`과 공유 카운터 방식의 `my-dtl`을 보존하고, 이득비와 정확한 경로 깊이 및 검증 기반 가지치기 변형을 별도로 추가했습니다. 홀드아웃 평가와 예측 경로를 제공하며 초기 실험 표는 새로운 측정과 구분합니다.
 
 ## 저장소 구조
 
@@ -37,7 +37,9 @@ COMP24412에서 수행한 세 프로젝트를 자동 정리 증명, 논리 프�
     └── symbolic-machine-learning/
         ├── learning/       # 결정 트리와 FOIL 구현
         ├── tests/          # 공개 테스트와 그래프 픽스처
-        ├── docs/           # 실험 보고서와 평가 가이드
+        ├── tools/          # 동일 조건 벤치마크와 환경 및 배포 검사
+        ├── docs/           # 개선 결과와 보존한 초기 보고서
+        ├── legacy/         # 초기 소스와 실험의 고정 스냅샷
         └── references/     # 과제 및 강의 자료
 ```
 
@@ -68,29 +70,26 @@ true.
 
 ### 3. 기호 머신러닝
 
-Python 3와 SWI-Prolog가 필요합니다. 다음 Conda 워크플로는 두 런타임을 하나의 로컬 환경에 설치합니다.
+Python 3.12와 함께 Windows에서는 SWI-Prolog 9.2.9 x64, Ubuntu 24.04에서는 시스템 패키지 9.0.4를 사용합니다. SWI-Prolog를 별도로 설치하고 새 Python 환경에서 기호 학습 검사를 실행합니다.
 
 ```bash
 cd projects/symbolic-machine-learning
-conda create -p .venv -c conda-forge python=3.12 swi-prolog=9.2.9 pip -y
-conda activate ./.venv
-python -m pip install -r requirements.txt
-python -m pytest
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.lock.txt
+python tools/run_checks.py --output-dir outputs/verification
 ```
 
-SWI-Prolog가 이미 시스템에 설치되어 있다면 프로젝트 README의 일반 Python `venv` 설치 방법을 사용할 수 있습니다.
+Windows PowerShell에서는 `.\.venv\Scripts\Activate.ps1`로 활성화합니다. 런타임 연결은 [프로젝트 README](projects/symbolic-machine-learning/README.ko.md), 실험 실행과 파일 무결성 확인은 [재현 문서](projects/symbolic-machine-learning/docs/reproduce.ko.md)를 참고하세요.
 
-2026-10-05에 Python 3.12.7과 SWI-Prolog 9.2.9 환경에서 기호 학습 공개 테스트
-30개가 통과했고, 생성 결정 트리 기본 실험과 재귀 그래프 홀드아웃 평가도 종료했습니다.
-[검증 명령과 버전 조합](projects/symbolic-machine-learning/README.ko.md#실제-기본-실험-검증-2026-10-05)을
-참고하세요. Vampire는 별도의 자동 추론 경로에만 필요합니다.
+2026-10-05의 초기 기본 검증 30개 통과는 과거 기록으로 유지합니다. 개선 배포본은 실제 소스 ZIP을 풀어 같은 PC의 새 환경에서 확인했습니다. Windows는 151개 통과와 권한 관련 심볼릭 링크 2개 건너뜀, WSL의 Linux 환경은 153개 모두 통과했습니다. 두 환경에서 실제 Prolog 질의와 네이티브 프로세스 종료를 포함한 통합 다섯 단계가 모두 통과했습니다. [실행 환경과 검증 근거](projects/symbolic-machine-learning/docs/validation.ko.md)를 참고하세요. Vampire는 별도의 자동 추론 경로에만 필요합니다.
 
 ## 문서
 
-모든 Markdown 문서는 영어를 기본으로 하며 한국어 대응 문서로 이동할 수 있습니다. 세부 구현은 각 프로젝트 README에서, 측정 결과와 한계는 기호 학습 프로젝트의 [실험 보고서](projects/symbolic-machine-learning/docs/experiment-report.ko.md)에서 확인할 수 있습니다.
+모든 Markdown 문서는 영어를 기본으로 하며 한국어 대응 문서로 이동할 수 있습니다. 세부 구현은 각 프로젝트 README에서 확인할 수 있습니다. 기호 학습의 [구조](projects/symbolic-machine-learning/docs/architecture.ko.md)와 [재현 문서](projects/symbolic-machine-learning/docs/reproduce.ko.md)는 개선한 실행 경로를 설명하며 [초기 실험 보고서](projects/symbolic-machine-learning/docs/experiment-report.ko.md)는 과거 기록으로 보존합니다.
 
 ## 배경
 
-이 저장소는 맨체스터 대학교 COMP24412 Knowledge-Based Artificial Intelligence 과목(2024-25)의 과제로 시작되었습니다. 출처와 맥락을 보존하기 위해 원본 과제 및 강의 PDF를 각 프로젝트의 `references/`에 유지했습니다. 포트폴리오에 불필요한 캐시, LaTeX 보조 파일, 오래된 수업 동기화·제출 스크립트, 미완성 백업 파일은 제거했습니다.
+이 저장소는 맨체스터 대학교 COMP24412 Knowledge-Based Artificial Intelligence 과목(2024-25)의 과제로 시작되었습니다. 출처와 맥락을 보존하기 위해 원본 과제 및 강의 PDF를 각 프로젝트의 `references/`에 유지했습니다. 포트폴리오에 불필요한 캐시, LaTeX 보조 파일, 오래된 수업 동기화 및 제출 스크립트, 미완성 백업 파일은 제거했습니다.
 
 현재 별도 라이선스가 선언되어 있지 않습니다. 코드와 제공된 수업 자료를 사용할 때 이 점을 고려해 주세요.

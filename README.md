@@ -18,7 +18,7 @@ A curated portfolio of three projects from COMP24412, covering automated theorem
 - Built recursive Prolog predicates that validate compatibility, nested shields, component use, and structural constraints.
 - Implemented a decision-tree learner and converted learned trees into readable logical expressions.
 - Implemented a FOIL-style inductive logic programming learner backed by a Prolog knowledge base.
-- Developed `my-dtl`, a gain-ratio and depth-limited decision-tree variant. Recorded coursework experiments report 44-80% lower training time and a 19.1 percentage-point gain in one high-noise setting, alongside documented regressions in lower-noise and limited-data cases.
+- Preserved the initial `dtl` and shared-counter `my-dtl`, then added independently comparable gain-ratio, exact-depth and validation-pruned variants with held-out evaluation and inspectable prediction traces. The historical experiment tables remain separate from the maintained measurements.
 
 ## Repository map
 
@@ -37,7 +37,9 @@ A curated portfolio of three projects from COMP24412, covering automated theorem
     └── symbolic-machine-learning/
         ├── learning/       # Decision-tree and FOIL implementations
         ├── tests/          # Public tests and graph fixtures
-        ├── docs/           # Experiment report and evaluation guide
+        ├── tools/          # Paired benchmarks and environment/release checks
+        ├── docs/           # Maintained results and preserved initial reports
+        ├── legacy/         # Pinned initial source and experiment snapshot
         └── references/     # Coursework and lecture material
 ```
 
@@ -68,27 +70,23 @@ true.
 
 ### 3. Symbolic machine learning
 
-Python 3 and SWI-Prolog are required. The following Conda workflow installs both in one local environment:
+Use Python 3.12 and the documented native runtime: SWI-Prolog 9.2.9 x64 on Windows or the 9.0.4 system package on Ubuntu 24.04. Install SWI-Prolog separately, create a Python environment and run the symbolic-learning checks:
 
 ```bash
 cd projects/symbolic-machine-learning
-conda create -p .venv -c conda-forge python=3.12 swi-prolog=9.2.9 pip -y
-conda activate ./.venv
-python -m pip install -r requirements.txt
-python -m pytest
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.lock.txt
+python tools/run_checks.py --output-dir outputs/verification
 ```
 
-See the project README for a standard Python `venv` setup when SWI-Prolog is already installed on the system.
+On Windows PowerShell activate with `.\.venv\Scripts\Activate.ps1`. See the [project README](projects/symbolic-machine-learning/README.md) for native runtime discovery and [reproduction guide](projects/symbolic-machine-learning/docs/reproduce.md) for experiments and source integrity checks.
 
-On 2026-10-05, the symbolic-learning public suite passed 30 tests on Python 3.12.7
-and SWI-Prolog 9.2.9. The generated decision-tree smoke experiment and recursive
-graph hold-out evaluation also completed. See the [validated commands and version
-set](projects/symbolic-machine-learning/README.md#verified-smoke-experiments-2026-10-05).
-Vampire is needed only for the separate automated-reasoning workflow.
+The initial 2026-10-05 smoke verification passed 30 tests and remains a historical record. The maintained release was verified from an actual extracted source ZIP in fresh environments on the same PC: Windows passed 151 tests with two permission-related symlink skips, and Linux/WSL passed all 153 tests. Both environments passed all five guarded stages, including the actual Prolog query and native process shutdown. See the [executed environments and evidence](projects/symbolic-machine-learning/docs/validation.md). Vampire is needed only for the separate automated-reasoning workflow.
 
 ## Documentation
 
-Every Markdown document is written in English by default and links to a Korean counterpart. Start with an individual project README for technical details, or read the symbolic learning [experiment report](projects/symbolic-machine-learning/docs/experiment-report.md) for measured results and limitations.
+Every Markdown document is written in English by default and links to a Korean counterpart. Start with an individual project README for technical details. The symbolic-learning [architecture](projects/symbolic-machine-learning/docs/architecture.md) and [reproduction guide](projects/symbolic-machine-learning/docs/reproduce.md) explain the maintained workflow; the [initial experiment report](projects/symbolic-machine-learning/docs/experiment-report.md) is preserved as a historical record.
 
 ## Context
 

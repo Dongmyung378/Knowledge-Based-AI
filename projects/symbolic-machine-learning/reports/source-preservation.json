@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "initial_git_commit": "aa947038f923e98ec0bf16457745d538284ef45c",
+  "initial_payloads_verified": 30,
+  "snapshot_payloads": 27,
+  "unchanged_shared_reference_pdfs": 3,
+  "initial_dtl_source_prefix_preserved": true,
+  "historical_experiment_reports_byte_identical": [
+    "docs/experiment-report.ko.md",
+    "docs/experiment-report.md"
+  ],
+  "scope": "Initial source and records are retrieved byte-for-byte from the preserved source ZIP or the unchanged shared reference PDFs. New variants are appended after the initial DTL code."
+}

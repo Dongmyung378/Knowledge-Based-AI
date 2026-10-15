@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "frozen_utc": "2026-10-15T05:11:33.231870+00:00",
+  "plan_sha256": "29783a62a66fdf7633f9ff81c41f8802d2c0ae96b5da7439c90c5f550ff95484",
+  "attribute_source_sha256": "9f2c62f08d0348cc2b2f0da3a89b96a25d14f2ecf5fbbe3d393bdaeb4852f393",
+  "benchmark_source_sha256": "414edff08e9d20583d2a364875f818bb4f8dfcb1c3c904dff061288f1cd69170",
+  "development_report_sha256": "378f0fb9acf519a2907085611e2dea6231f013ae582a5b441d977266d3003509",
+  "representative": "gain-depth-tuned",
+  "selection_data": "Outer clean held-out examples in development seeds 0-4 only. Inner validation selects depth or prunes a tree. Final evaluation seeds 100-109 have not been run.",
+  "development_balanced_accuracy": 0.72219882617462,
+  "initial_my_dtl_development_balanced_accuracy": 0.6474259177183949,
+  "settings_policy": "For every new dataset, choose depth from 2, 4, 6, and number of attributes using only its inner validation balanced accuracy; break ties by fewer nodes and then shallower actual depth.",
+  "all_comparison_conditions_retained": [
+    "majority",
+    "dtl",
+    "my-dtl",
+    "corrected-dtl",
+    "gain-ratio",
+    "depth-limited",
+    "gain-depth",
+    "gain-depth-tuned",
+    "pruned-dtl"
+  ],
+  "declined_representative_candidates": {
+    "dtl": {
+      "development_balanced_accuracy": 0.6821193544992172,
+      "mean_nodes": 128.75,
+      "reason": "Lower outer development held-out balanced accuracy than the selected policy. Preserved as an ablation; no further search."
+    },
+    "my-dtl": {
+      "development_balanced_accuracy": 0.6474259177183949,
+      "mean_nodes": 22.8,
+      "reason": "Lower outer development held-out balanced accuracy than the selected policy. Preserved as an ablation; no further search."
+    },
+    "corrected-dtl": {
+      "development_balanced_accuracy": 0.681772132276995,
+      "mean_nodes": 128.7,
+      "reason": "Lower outer development held-out balanced accuracy than the selected policy. Preserved as an ablation; no further search."
+    },
+    "gain-ratio": {
+      "development_balanced_accuracy": 0.676189959945502,
+      "mean_nodes": 129.2,
+      "reason": "Lower outer development held-out balanced accuracy than the selected policy. Preserved as an ablation; no further search."
+    },
+    "depth-limited": {
+      "development_balanced_accuracy": 0.681772132276995,
+      "mean_nodes": 112.2,
+      "reason": "Lower outer development held-out balanced accuracy than the selected policy. Preserved as an ablation; no further search."
+    },
+    "gain-depth": {
+      "development_balanced_accuracy": 0.676189959945502,
+      "mean_nodes": 112.3,
+      "reason": "Lower outer development held-out balanced accuracy than the selected policy. Preserved as an ablation; no further search."
+    },
+    "pruned-dtl": {
+      "development_balanced_accuracy": 0.6984181174205487,
+      "mean_nodes": 29.2,
+      "reason": "Lower outer development held-out balanced accuracy than the selected policy. Preserved as an ablation; no further search."
+    }
+  },
+  "inference_execution": {
+    "adopted": "retained-tree traversal",
+    "equivalent_explanation": "DNF remains available as hypothesis and is independently checked against tree predictions",
+    "development_equal_predictions": 12288,
+    "development_median_batch_time_reduction": 0.4519943673436762,
+    "minimum_time_reduction_required": 0.05
+  },
+  "stop_decision": "Stop candidate search after the declared depth grid, reduced-error-pruning comparison, and equivalent tree-traversal inference experiment. Report every condition, including losses."
+}

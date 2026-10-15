@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "inputs": {
+    "reports/attribute-evaluation.json": "99a36decdd3c6e5cb22f2b414d7a28398155cd0d98d26a8c81cd6b337f274b38",
+    "reports/inference-evaluation.json": "7135a07e3fb65a7d4fbb066559604f3a39c6c31d0eadc6b3dba3b68caf8c8104",
+    "reports/foil-final-greedy.json": "b5e32a91125044139c1a3572b56beb3deb9411633db59041ba742deebf683018",
+    "reports/foil-final-lookahead.json": "3d6e77190960aabdf4c16887c30476c66cbb134d38c11012bfbd5b254a367dbf"
+  },
+  "renderer_sha256": "1977c86196589d86392646f2c50320bb72bc76cf7b020d7f56d5d0ea692d680c",
+  "scope": "Every numerical chart is generated from raw reports. The small rule illustration uses an actual fitted explanatory model and is not a held-out result."
+}

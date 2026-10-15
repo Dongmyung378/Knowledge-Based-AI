@@ -1,6 +1,7 @@
 import itertools
 import re
 import math
+import time
 from contextlib import closing, contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -13,6 +14,37 @@ from learning.util import Algorithm, Examples, Dataset, Example, AlgorithmRegist
 from logging import getLogger
 
 logger = getLogger(__name__)
+
+
+class FOILLearningError(RuntimeError):
+    """The supported greedy hypothesis search cannot separate the examples."""
+
+
+class FOILBudgetExceeded(FOILLearningError):
+    """A declared time or search budget was exhausted, without a valid result."""
+
+
+class FOILQueryError(FOILLearningError):
+    """A Prolog query failed instead of returning a logical false answer."""
+
+
+class FOILCleanupError(FOILLearningError):
+    """One or more cleanup operations failed after all were attempted."""
+
+
+_VARIABLE = re.compile(r"[A-Z][A-Za-z0-9_]*\Z")
+_ATOM = re.compile(r"[a-z][A-Za-z0-9_]*\Z")
+
+
+def _ground_term(value):
+    """Serialize the intentionally small supported example-value schema."""
+    if isinstance(value, str) and _ATOM.fullmatch(value):
+        return value
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        if isinstance(value, int) or math.isfinite(value):
+            return str(value)
+    raise ValueError("Example values must be unquoted lowercase Prolog atoms or finite numbers; "
+                     f"received {value!r}.")
 
 
 @dataclass(frozen=True)
@@ -61,6 +93,8 @@ class Literal(Expression):
         Returns: A syntactically valid prolog representation of the literal.
 
         """
+        if self.predicate.arity == 0:
+            return self.predicate.name
         return f"{self.predicate.name}({','.join(str(a) for a in self.arguments)})"
 
     @classmethod
@@ -88,6 +122,8 @@ def get_predicate(text: str) -> Predicate:
 
     """
     text = str(text)
+    if '(' not in text:
+        return Predicate(text.strip(), 0)
     name = text[:text.find("(")].strip()
     arity = len(re.findall("Variable", text))
     if arity == 0:
@@ -176,7 +212,7 @@ class HornClause(Expression):
             ``head :- literal_1 , literal_2 , ... , literal_n``
             for all literals in the body.
         """
-        return f"{str(self.head)} :- {' , '.join(str(e) for e in self.body.expressions)}"
+        return f"{str(self.head)} :- {' , '.join(str(e) for e in self.body.expressions) or 'true'}"
 
 
 def get_args(text: str) -> List[str]:
@@ -192,63 +228,238 @@ def get_args(text: str) -> List[str]:
     """
     return [x.strip() for x in re.findall(r"\(.*\)", str(text))[0][1:-1].split(",")]
 
+def validate_foil_dataset(dataset):
+    """Validate the supported flat relation schema without consulting Prolog."""
+    return _FOIL._validate_dataset(dataset)
+
+
 # Register the FOIL algorithm under the name 'foil' for dynamic use in the system
 @AlgorithmRegistry.register('foil')
 @contextmanager
-def FOIL(dataset: Dataset, recursive=False):
+def FOIL(dataset: Dataset, recursive=False, *, max_seconds=60.0,
+         query_timeout_seconds=2.0, max_candidate_evaluations=20000,
+         max_prolog_queries=1000000, max_clauses=128, max_literals_per_clause=16, lookahead=0):
     # create an internal FOIL object (the actual implementation is in _FOIL class)
-    f = _FOIL(dataset, recursive)
+    f = _FOIL(dataset, recursive, max_seconds=max_seconds,
+              query_timeout_seconds=query_timeout_seconds,
+              max_candidate_evaluations=max_candidate_evaluations,
+              max_prolog_queries=max_prolog_queries, max_clauses=max_clauses,
+              max_literals_per_clause=max_literals_per_clause, lookahead=lookahead)
+    body_error = None
     try:
         # yield the FOIL object to the user (with 'with' statement)
         yield f
+    except BaseException as exc:
+        body_error = exc
+        raise
     finally:
         # clean up by removing all asserted predicates from the Prolog engine
-        f.abolish()
+        try:
+            f.abolish()
+        except Exception as cleanup_error:
+            if body_error is None:
+                raise
+            if hasattr(body_error, "add_note"):
+                body_error.add_note(f"FOIL cleanup also failed: {cleanup_error}")
+            logger.error("FOIL cleanup failed while preserving the original exception: %s", cleanup_error)
 
 
 class _FOIL(Algorithm):
     # type hint: this class will use SWI-Prolog through the PySWIP interface
     prolog: Prolog
 
-    def __init__(self, dataset: Dataset, recursive=False):
+    def __init__(self, dataset: Dataset, recursive=False, *, max_seconds=60.0,
+                 query_timeout_seconds=2.0, max_candidate_evaluations=20000,
+                 max_prolog_queries=1000000, max_clauses=128, max_literals_per_clause=16, lookahead=0):
         # call the base Algorithm constructor with the dataset
         super().__init__(dataset)
+        self._target_literal = self._validate_dataset(dataset)
+        self.max_seconds = self._positive_budget("max_seconds", max_seconds)
+        self.query_timeout_seconds = self._positive_budget("query_timeout_seconds", query_timeout_seconds)
+        if isinstance(lookahead, bool) or lookahead not in (0, 2):
+            raise ValueError("lookahead must be 0 (original greedy search) or 2 (bounded zero-gain bridge search).")
+        self.lookahead = lookahead
+        self.search_trace_ = []
+        for name, value in (("max_candidate_evaluations", max_candidate_evaluations),
+                            ("max_prolog_queries", max_prolog_queries),
+                            ("max_clauses", max_clauses),
+                            ("max_literals_per_clause", max_literals_per_clause)):
+            if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+                raise ValueError(f"{name} must be a positive integer.")
+            setattr(self, name, value)
+        self.stats_ = {"candidate_evaluations": 0, "prolog_queries": 0,
+                       "clauses": 0, "literals": 0, "fit_seconds": 0.0}
+        self._deadline = None
+        self._closed = False
+        self._target_initialized = False
+        self._owned_predicates = []
         # log creation of the Prolog engine
         logger.info("Creating prolog...")
         # initialize the Prolog engine
         self.prolog = Prolog()
+        # Collect a finite answer batch under SWI's standard time-limit helper.
+        # Its alarm is removed before any answer is yielded back to Python.
+        # The private helper contains no dataset facts or learned clauses.
+        if not list(self.prolog.query("current_predicate(foil_runtime:bounded_query/2)")):
+            self.prolog.assertz(
+                "foil_runtime:(bounded_query(Seconds, Goal) :- "
+                "term_variables(Goal, Vars), "
+                "call_with_time_limit(Seconds, findall(Vars, limit(100001, Goal), Answers)), "
+                "length(Answers, Count), (Count=<100000 -> member(Vars, Answers); "
+                "throw(error(resource_error(foil_query_solutions), _))))")
+        if not list(self.prolog.query("current_predicate(foil_runtime:clause_covers/3)")):
+            # A database clause reference is an opaque SWI resource. Keep it
+            # local to Prolog instead of returning a soon-erased reference in
+            # PySwip's Python result bindings.
+            self.prolog.assertz(
+                "foil_runtime:(clause_covers(Clause, Goal, Reset) :- "
+                "setup_call_cleanup((assertz(user:Clause, Ref), call(Reset)), "
+                "once(Goal), (erase(Ref), call(Reset))))")
         # store whether recursive rules should be allowed in hypothesis generation
         self.recursive = recursive
         self.kb_path = Path(dataset.kb).resolve() if dataset.kb else None
         self._prolog_kb_path = None
 
-        # if a knowledge base file is provided, load it into Prolog
-        if self.kb_path:
-            logger.debug(f"Consulting {self.kb_path}")
-            self.prolog.consult(self.kb_path.as_posix())
+        self._target = self._target_literal.predicate
+        try:
             escaped_path = self.kb_path.as_posix().replace("'", "''")
-            # SWI canonicalizes Windows paths to lowercase. unload_file/1
-            # needs that source identifier, rather than Python's path spelling.
-            self._prolog_kb_path = next(self.prolog.query(
-                f"absolute_file_name('{escaped_path}', Canonical)."
-            ))['Canonical']
-        self._target = get_predicate(dataset.target) if dataset.target else None
-        if self.recursive and self._target:
+            # Resolve the canonical source identity before consulting so that
+            # even a partially failed consult can be unloaded on initialization.
+            self._prolog_kb_path = self._query_all(
+                f"absolute_file_name('{escaped_path}', Canonical)")[0]['Canonical']
+            self._query_all(f"consult('{escaped_path}')")
+            self._owned_predicates = self.get_predicates()
+            if self._target in self._owned_predicates:
+                raise ValueError("The target predicate must not already be defined in the knowledge base.")
+        except BaseException as exc:
+            try:
+                self.abolish()
+            except Exception as cleanup_error:
+                if hasattr(exc, "add_note"):
+                    exc.add_note(f"Initialization cleanup also failed: {cleanup_error}")
+            raise
+
+    @staticmethod
+    def _positive_budget(name, value):
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0:
+            raise ValueError(f"{name} must be a positive finite number.")
+        return float(value)
+
+    def _ensure_target_runtime(self):
+        # Merely inspecting candidates or a KB does not need a target table.
+        # Declare it only when a real proof/training operation will use it.
+        if self.recursive and not self._target_initialized:
             indicator = f"{self._target.name}/{self._target.arity}"
-            # A learned recursive rule can revisit the same goal through a
-            # graph cycle. Tabling gives finite, set-valued answers for these
-            # finite relational fixtures, including failed reachability goals.
-            list(self.prolog.query(f"dynamic({indicator})."))
-            list(self.prolog.query(f"table({indicator})."))
+            self._query_all(f"dynamic({indicator})")
+            self._query_all(f"table({indicator})")
+            self._target_initialized = True
+
+    @staticmethod
+    def _validate_dataset(dataset):
+        if not isinstance(dataset.target, str):
+            raise ValueError("FOIL requires a target such as reachable(X,Y).")
+        match = re.fullmatch(r"\s*([a-z][A-Za-z0-9_]*)\(([^()]*)\)\s*\.?\s*", dataset.target)
+        if not match:
+            raise ValueError("FOIL target must be a flat predicate with named variables, such as reachable(X,Y).")
+        variables = [part.strip() for part in match.group(2).split(',')]
+        if not variables or any(not _VARIABLE.fullmatch(variable) for variable in variables) or len(set(variables)) != len(variables):
+            raise ValueError("Target arguments must be distinct named uppercase variables.")
+        if not dataset.kb or not Path(dataset.kb).is_file():
+            raise ValueError("FOIL requires an existing Prolog knowledge-base file.")
+        expected_keys = set(variables)
+        for example in dataset.examples:
+            if not isinstance(example, dict) or set(example) != expected_keys:
+                raise ValueError(f"Each example must contain exactly the target variables {variables}.")
+            for value in example.values():
+                _ground_term(value)
+        positive = dataset.positive_examples
+        negative = dataset.negative_examples
+        if positive is not None and negative is not None:
+            positive_keys = {tuple(example[name] for name in variables) for example in positive}
+            negative_keys = {tuple(example[name] for name in variables) for example in negative}
+            if positive_keys & negative_keys:
+                raise ValueError("Positive and negative examples contain contradictory bindings.")
+        return Literal(Predicate(match.group(1), len(variables)), variables)
+
+    def _check_deadline(self):
+        if self._closed:
+            raise FOILLearningError("This FOIL context has closed; prediction and training must stay inside it.")
+        if self._deadline is not None and time.perf_counter() >= self._deadline:
+            raise FOILBudgetExceeded(f"FOIL exceeded max_seconds={self.max_seconds:g}.")
+
+    def _query(self, goal):
+        self._check_deadline()
+        if self.stats_["prolog_queries"] >= self.max_prolog_queries:
+            raise FOILBudgetExceeded(f"FOIL exceeded max_prolog_queries={self.max_prolog_queries}.")
+        self.stats_["prolog_queries"] += 1
+        limit = self.query_timeout_seconds
+        if self._deadline is not None:
+            limit = min(limit, max(0.000001, self._deadline - time.perf_counter()))
+        goal = goal.rstrip().rstrip('.')
+        try:
+            # call_with_time_limit/2 commits to the first solution; collecting
+            # the bounded answer batch inside it preserves every substitution.
+            timed_goal = f"foil_runtime:bounded_query({limit!r}, user:({goal}))"
+            with closing(self.prolog.query(timed_goal)) as query:
+                for result in query:
+                    self._check_deadline()
+                    yield result
+        except FOILLearningError:
+            raise
+        except Exception as exc:
+            if "time_limit_exceeded" in str(exc):
+                raise FOILBudgetExceeded(f"Prolog query exceeded its {limit:g}-second limit.") from exc
+            if "foil_query_solutions" in str(exc):
+                raise FOILBudgetExceeded("Prolog query exceeded its 100000-answer limit.") from exc
+            raise FOILQueryError(f"Prolog query failed: {goal[:160]}: {exc}") from exc
+
+    def _query_all(self, goal):
+        return list(self._query(goal))
+
+    def _query_once(self, goal):
+        with closing(self._query(goal)) as query:
+            return next(query, None) is not None
+
+    def fit(self):
+        self._check_deadline()
+        if self.dataset.positive_examples is None or self.dataset.negative_examples is None:
+            raise ValueError("FOIL fit requires separate positive_examples and negative_examples.")
+        if getattr(self, "_fit_attempted", False):
+            raise FOILLearningError("Create a new FOIL context for each fit; repeated fitting is unsupported.")
+        self._fit_attempted = True
+        self.stats_ = {"candidate_evaluations": 0, "prolog_queries": 0,
+                       "clauses": 0, "literals": 0, "fit_seconds": 0.0}
+        self._var_counter = 0
+        start = time.perf_counter()
+        self._deadline = start + self.max_seconds
+        try:
+            super().fit()
+        except BaseException as exc:
+            # A failed fit must not leave a partially learned target available
+            # as though it were a successful classifier, even if its caller
+            # catches the exception before leaving the context.
+            try:
+                arguments = ','.join('_' for _ in range(self._target.arity))
+                goals = [f"retractall({self._target.name}({arguments}))"]
+                if self.recursive:
+                    goals.append(f"abolish_table_subgoals({self._target.name}({arguments}))")
+                with closing(self.prolog.query(
+                        f"call_with_time_limit({self.query_timeout_seconds!r}, ({', '.join(goals)}))")) as query:
+                    list(query)
+            except Exception as cleanup_error:
+                if hasattr(exc, "add_note"):
+                    exc.add_note(f"Failed-fit cleanup also failed: {cleanup_error}")
+            raise
+        finally:
+            self.stats_["fit_seconds"] = time.perf_counter() - start
+            self._deadline = None
 
     def _invalidate_target_table(self):
         # Ordinary tables do not track asserted/retracted clauses. Clear only
         # this learner's target tables after changing its hypothesis.
-        if self.recursive and self._target:
+        if self.recursive and self._target_initialized:
             arguments = ','.join('_' for _ in range(self._target.arity))
-            list(self.prolog.query(
-                f"abolish_table_subgoals({self._target.name}({arguments}))."
-            ))
+            self._query_all(f"abolish_table_subgoals({self._target.name}({arguments}))")
 
     def abolish(self):
         # PySwip queries are lazy, so consume each cleanup query to make sure
@@ -257,26 +468,61 @@ class _FOIL(Algorithm):
         # Learned clauses are asserted dynamically and therefore have no
         # source-file property. Add the target explicitly so those clauses do
         # not leak into the next test or training run.
-        predicates = set(self.get_predicates())
-        if self.dataset.target:
-            predicates.add(get_predicate(self.dataset.target))
-        if self.recursive and self._target:
-            self._invalidate_target_table()
-            list(self.prolog.query(f"untable({self._target.name}/{self._target.arity})."))
-        for predicate in predicates:
-            list(self.prolog.query(f"abolish({predicate.name}/{predicate.arity})"))
+        if self._closed:
+            return
+        errors = []
+        # Cleanup deliberately bypasses exhausted fit/query budgets. Every
+        # operation has its own finite timeout, and later operations are still
+        # attempted if an earlier operation fails.
+        def cleanup(goal):
+            try:
+                with closing(self.prolog.query(
+                        f"call_with_time_limit({self.query_timeout_seconds!r}, ({goal}))")) as query:
+                    list(query)
+            except Exception as exc:
+                errors.append(f"{goal}: {exc}")
 
-        # Unloading the source file clears both its clauses and SWI-Prolog's
-        # source metadata. Abolishing its predicates alone leaves enough state
-        # behind to interfere with a different KB loaded later in this process.
+        predicates = set(self._owned_predicates)
+        predicates.add(self._target)
+        if self.recursive and self._target_initialized:
+            arguments = ','.join('_' for _ in range(self._target.arity))
+            cleanup(f"abolish_table_subgoals({self._target.name}({arguments}))")
+            cleanup(f"untable({self._target.name}/{self._target.arity})")
+        for predicate in sorted(predicates, key=lambda item: (item.name, item.arity)):
+            cleanup(f"abolish({predicate.name}/{predicate.arity})")
         if self._prolog_kb_path:
             escaped_path = self._prolog_kb_path.replace("'", "''")
-            list(self.prolog.query(f"unload_file('{escaped_path}')"))
+            cleanup(f"unload_file('{escaped_path}')")
+        self._closed = True
+        if errors:
+            raise FOILCleanupError("FOIL cleanup could not complete all operations: " + "; ".join(errors))
 
     def predict(self, example: Example) -> bool:
         # checks whether any learned clause (in the current hypothesis) covers the given example
         # 'covers' means the clause can prove the example using the current knowledge base
-        return any(self.covers(clause=c, example=example) for c in self.hypothesis.expressions)
+        if not hasattr(self, "hypothesis"):
+            raise FOILLearningError("Call fit before prediction.")
+        return self._query_once(self._bound_target(example))
+
+    def _bound_target(self, example):
+        variables = self._target_literal.arguments
+        if not isinstance(example, dict) or set(example) != set(variables):
+            raise ValueError(f"Prediction requires exactly the target variables {variables}.")
+        return f"{self._target.name}({','.join(_ground_term(example[name]) for name in variables)})"
+
+    def predict_with_trace(self, example):
+        """Return matching clause bodies, not an exhaustive Prolog proof tree."""
+        prediction = self.predict(example)
+        matching = []
+        if prediction:
+            bound_target = self._bound_target(example)
+            for index, clause in enumerate(self.hypothesis.expressions):
+                body = repr(clause.body) or "true"
+                if self._query_once(f"({clause.head} = {bound_target}), ({body})"):
+                    matching.append({"clause_index": index, "clause": repr(clause),
+                                     "bindings": dict(example)})
+        return {"prediction": prediction, "matching_clauses": matching,
+                "scope": "Matching learned clause bodies; not a complete Prolog proof tree."}
         
     def get_predicates(self) -> List[Predicate]:
         # initialize an empty set to store unique predicates
@@ -284,7 +530,7 @@ class _FOIL(Algorithm):
 
         # query the Prolog engine for all predicates that have an associated file
         # this will return a list of dictionaries with keys 'P' (predicate) and 'F' (file path)
-        for result in self.prolog.query("predicate_property(P, file(F))."):
+        for result in self._query("predicate_property(P, file(F))"):
             # extract the string representation of the predicate
             pred_str = result["P"]  
             # extract the file path in which the predicate is defined
@@ -317,9 +563,17 @@ class _FOIL(Algorithm):
         predicates = self.get_predicates()
         # ensure that at least one predicate was found
         # if no predicates are found in KB, learning cannot proceed
-        assert predicates
+        if not predicates:
+            raise FOILLearningError("The knowledge base contains no supported source predicates.")
         # run the FOIL algorithm to generate a list of Horn clauses covering the target relation
         clauses = self.foil(positive_examples, negative_examples, predicates, target)
+        # Adding a recursive clause changes the closure of every target query.
+        # Validate the final asserted hypothesis, not just its local extension
+        # counts, before exposing it as a successfully fitted classifier.
+        if any(not self._query_once(self._bound_target(example)) for example in positive_examples):
+            raise FOILLearningError("The final learned hypothesis does not cover every training positive.")
+        if any(self._query_once(self._bound_target(example)) for example in negative_examples):
+            raise FOILLearningError("The final learned recursive closure still covers training negatives.")
         # wrap the learned clauses into a Disjunction object (OR of Horn clauses) and return
         return Disjunction(clauses)
 
@@ -332,6 +586,9 @@ class _FOIL(Algorithm):
 
         # iterate until all positive examples are covered by some clause
         while uncovered_pos:
+            self._check_deadline()
+            if len(clauses) >= self.max_clauses:
+                raise FOILBudgetExceeded(f"FOIL exceeded max_clauses={self.max_clauses}.")
             # (optional) if recursive mode is enabled and this is the second clause,
             # allow the target predicate to be used in the body (i.e., allow recursion)
             if self.recursive and target.predicate not in predicates and len(clauses) == 1:
@@ -339,43 +596,43 @@ class _FOIL(Algorithm):
             
             # learn one clause that covers as many of the uncovered positive examples as possible
             clause = self.new_clause(uncovered_pos, negative_examples, predicates, target)
+            remaining = [example for example in uncovered_pos if not self.covers(clause, example)]
+            if len(remaining) >= len(uncovered_pos):
+                raise FOILLearningError("A learned clause covered no remaining positive examples; search made no progress.")
             # add the new clause to the list of learned clauses
             clauses.append(clause)
             # assert the clause into Prolog so it can be used during further reasoning (e.g., recursion)
-            self.prolog.assertz(repr(clause))
+            self._query_all(f"assertz(({clause!r}))")
             self._invalidate_target_table()
             # remove all positive examples that are now covered by the new clause
-            uncovered_pos = [e for e in uncovered_pos if not self.covers(clause, e)]
+            uncovered_pos = remaining
+            self.stats_["clauses"] = len(clauses)
+            self.stats_["literals"] = sum(len(item.body.expressions) for item in clauses)
         # return the complete list of learned clauses
         return clauses
 
     def covers(self, clause: HornClause, example: Example) -> bool:
+        self._ensure_target_runtime()
         # convert the HornClause object to a Prolog-compatible string
         clause_str = repr(clause)
 
         # substitute variable names in the clause head with actual values from the example
         # if the argument exists in the example, use the value; otherwise keep the original variable
-        substituted_args = [
-            example.get(arg, arg) if isinstance(arg, str) else arg for arg in clause.head.arguments
-        ]
+        substituted_args = [_ground_term(example[arg]) if arg in example else arg
+                            for arg in clause.head.arguments]
         # create a new Literal with substituted arguments
         substituted_head = Literal(clause.head.predicate, substituted_args)
         # convert the substituted head literal into a Prolog query string
         query_str = repr(substituted_head)
-        # assert the clause into Prolog so we can query it
-        self.prolog.assertz(clause_str)
-        self._invalidate_target_table()
-        try:
-            # run the query and check whether it succeeds at least once
-            with closing(self.prolog.query(query_str)) as query:
-                return next(query, None) is not None
-        except Exception:
-            # if an error occurs during query execution, return False
-            return False
-        finally:
-            # always retract the clause after the query to clean up the Prolog environment
-            self.prolog.retract(clause_str)
-            self._invalidate_target_table()
+        reset = "true"
+        if self.recursive:
+            arguments = ','.join('_' for _ in range(self._target.arity))
+            reset = f"abolish_table_subgoals({self._target.name}({arguments}))"
+        # SWI cleanup executes even when the proof raises or its time limit is
+        # interrupted. Erase the exact temporary clause reference, preserving
+        # any identical permanent clause. Query errors are never logical False.
+        return self._query_once(
+            f"foil_runtime:clause_covers(({clause_str}), user:({query_str}), user:({reset}))")
 
 
     def new_clause(self, positive_examples: Examples, negative_examples: Examples, predicates: List[Predicate],
@@ -388,12 +645,16 @@ class _FOIL(Algorithm):
         
         # continue specializing the clause until all negative examples are ruled out
         while neg:
-            # generate all possible candidate literals for specialization            
-            candidates = list(self.generate_candidates(clause, predicates))
-
-            filtered_candidates = []
+            self._check_deadline()
+            if len(clause.body.expressions) >= self.max_literals_per_clause:
+                raise FOILBudgetExceeded(
+                    f"FOIL exceeded max_literals_per_clause={self.max_literals_per_clause} "
+                    f"while {len(neg)} negative bindings remained.")
+            best_literal = None
+            best_gain = 0.0
+            zero_gain_candidates = []
             # filter candidates based on FOIL constraints and information gain
-            for lit in candidates:
+            for lit in self.generate_candidates(clause, predicates):
                 # if recursion is not allowed, skip using the target predicate in body
                 if not self.recursive and lit.predicate.name == target.predicate.name:
                     continue
@@ -404,32 +665,89 @@ class _FOIL(Algorithm):
                     self.recursive
                     # only applies to the first literal
                     and clause.body.expressions == []
+                    and lit.arguments
                     and lit.arguments[0] != target.arguments[0]
                 ):
                     continue 
                 # compute FOIL information gain for this literal
+                if lit in clause.body.expressions:
+                    continue
+                if self.stats_["candidate_evaluations"] >= self.max_candidate_evaluations:
+                    raise FOILBudgetExceeded(
+                        f"FOIL exceeded max_candidate_evaluations={self.max_candidate_evaluations}.")
+                self.stats_["candidate_evaluations"] += 1
                 gain = self.foil_information_gain(lit, pos, neg)
                 # discard literals that don’t improve classification
                 if gain <= 0:
+                    if abs(gain) <= 1e-12:
+                        zero_gain_candidates.append(lit)
                     continue
                 # keep the candidate and its gain
-                filtered_candidates.append((lit, gain))
+                if gain > best_gain:
+                    best_literal, best_gain = lit, gain
             
             # if no good candidate literals remain, stop refining
-            if not filtered_candidates:
-                break
+            selected_literals = [best_literal] if best_literal is not None else []
+            if not selected_literals and self.lookahead == 2:
+                if len(clause.body.expressions) + 2 > self.max_literals_per_clause:
+                    raise FOILBudgetExceeded("Two-literal lookahead would exceed max_literals_per_clause.")
+                selected_literals = self._lookahead_pair(clause, zero_gain_candidates, predicates, pos, neg)
+            if not selected_literals:
+                raise FOILLearningError(
+                    "No positive-gain candidate can separate the remaining examples "
+                    f"({len(pos)} positive and {len(neg)} negative bindings). "
+                    "The greedy learner did not produce a valid clause within its hypothesis language.")
             # choose the literal with the highest gain
-            best_literal, _ = max(filtered_candidates, key=lambda x: x[1])
             # add the best literal to the clause body (i.e., specialize the clause)
-            clause.body.expressions.append(best_literal)
-            
-            # extend both positive and negative examples by applying the new literal    
-            pos = list(itertools.chain.from_iterable(
-                self.extend_example(e, best_literal) for e in pos))
-            neg = list(itertools.chain.from_iterable(
-                self.extend_example(e, best_literal) for e in neg))
+            for selected_literal in selected_literals:
+                clause.body.expressions.append(selected_literal)
+                pos = list(itertools.chain.from_iterable(
+                    self.extend_example(e, selected_literal) for e in pos))
+                neg = list(itertools.chain.from_iterable(
+                    self.extend_example(e, selected_literal) for e in neg))
+            if not pos:
+                raise FOILLearningError("Clause specialization removed every positive binding.")
         # return the fully constructed Horn clause
         return clause
+
+    def _lookahead_pair(self, clause, first_candidates, predicates, pos, neg):
+        """Search two literals only after ordinary positive-gain search stalls.
+
+        The first literal must have zero gain and preserve a positive binding.
+        The pair uses the original example origins when computing FOIL gain.
+        All candidate, query, literal, and wall-time budgets remain in force.
+        """
+        best_pair, best_gain = [], 0.0
+        for first in first_candidates:
+            self._check_deadline()
+            extended_pos = [(index, extension) for index, example in enumerate(pos)
+                            for extension in self.extend_example(example, first)]
+            if not extended_pos:
+                continue
+            extended_neg = [extension for example in neg for extension in self.extend_example(example, first)]
+            trial = HornClause(clause.head, Conjunction(list(clause.body.expressions) + [first]))
+            for second in self.generate_candidates(trial, predicates):
+                if second in trial.body.expressions:
+                    continue
+                if self.stats_["candidate_evaluations"] >= self.max_candidate_evaluations:
+                    raise FOILBudgetExceeded(
+                        f"FOIL exceeded max_candidate_evaluations={self.max_candidate_evaluations} during lookahead.")
+                self.stats_["candidate_evaluations"] += 1
+                p1, origins = 0, set()
+                for origin, example in extended_pos:
+                    count = sum(1 for _ in self.extend_example(example, second))
+                    p1 += count
+                    if count:
+                        origins.add(origin)
+                n1 = sum(1 for example in extended_neg for _ in self.extend_example(example, second))
+                gain = (len(origins) * (math.log2(p1 / (p1 + n1)) - math.log2(len(pos) / (len(pos) + len(neg))))
+                        if p1 else 0.0)
+                if gain > best_gain:
+                    best_pair, best_gain = [first, second], gain
+        if best_pair:
+            self.search_trace_.append({"event": "zero_gain_bridge", "literals": [repr(item) for item in best_pair],
+                                       "joint_foil_gain": best_gain})
+        return best_pair
 
     def get_next_literal(self, candidates: List[Expression], pos_ex: Examples, neg_ex: Examples) -> Expression:
         # Not implemented: this method is unused in current FOIL logic
@@ -487,17 +805,22 @@ class _FOIL(Algorithm):
             
             # generate all possible literals using existing variables only
             for args in itertools.product(existing_vars, repeat=arity):
+                self._check_deadline()
                 # yield a new candidate literal with the current argument combination
                 yield Literal(predicate, list(args))
 
             # Next, generate literals that introduce one new variable
             # This helps the algorithm explore more general or novel combinations
             new_var = self.unique_var()
+            while new_var in existing_vars:
+                new_var = self.unique_var()
             for i in range(arity):
-                for var in existing_vars:
+                for old_args in itertools.product(existing_vars, repeat=max(0, arity - 1)):
+                    self._check_deadline()
                     # Create an argument list where one argument is the new variable,
                     # and the others are existing ones
-                    args = [new_var if j == i else var for j in range(arity)]
+                    arguments = iter(old_args)
+                    args = [new_var if j == i else next(arguments) for j in range(arity)]
                     # yield a candidate literal introducing a new variable
                     yield Literal(predicate, args)
 
@@ -506,7 +829,7 @@ class _FOIL(Algorithm):
 
         # Bind known values from the example to the literal's arguments
         bound_args = [
-            example.get(arg, arg) if isinstance(arg, str) else arg
+            _ground_term(example[arg]) if isinstance(arg, str) and arg in example else arg
             for arg in new_expr.arguments
         ]
         
@@ -516,7 +839,7 @@ class _FOIL(Algorithm):
         query_str = repr(bound_literal)
 
         # Execute the Prolog query to find all possible variable bindings that satisfy the literal
-        for result in self.prolog.query(query_str):
+        for result in self._query(query_str):
             # Create a new extended example by copying the current one
             extended = example.copy()
             # Add the variable bindings returned by Prolog

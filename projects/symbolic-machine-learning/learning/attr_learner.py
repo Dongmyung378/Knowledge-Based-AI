@@ -385,3 +385,296 @@ class MyDecisionTreeLearner(Algorithm):
         info_gain = total_entropy - weighted_entropy
         # return gain ratio = information gain / split info
         return info_gain / split_info
+
+
+# The original learners above remain available under their original names.
+# These variants keep their fitted tree and use a path-local depth bound.
+from collections.abc import Mapping
+from math import isfinite
+
+
+def _validate_categorical_example(example, domains):
+    """Validate a complete example without treating missing values as wildcards."""
+    if not isinstance(example, Mapping):
+        raise ValueError("An example must be a mapping of attribute names to values.")
+    for name, values in domains:
+        if name not in example:
+            raise ValueError(f"Missing required attribute: {name!r}.")
+        value = example[name]
+        if not any(type(value) is type(known) and value == known for known in values):
+            raise ValueError(f"Unseen category for attribute {name!r}: {value!r}.")
+
+
+@dataclass(frozen=True, repr=False)
+class _ValidatedDisjunction(Disjunction):
+    """A DNF with the same explicit input contract as its fitted tree."""
+
+    domains: tuple
+
+    def __call__(self, example):
+        _validate_categorical_example(example, self.domains)
+        return super().__call__(example)
+
+    def __repr__(self):
+        if not self.conjunctions:
+            return "FALSE"
+        if any(not conjunction.attribute_confs for conjunction in self.conjunctions):
+            return "TRUE"
+        return super().__repr__()
+
+
+@AlgorithmRegistry.register("corrected-dtl")
+class CorrectedDecisionTreeLearner(Algorithm):
+    """Categorical binary DTL with deterministic ties and optional regularisation.
+
+    Labels must be booleans. Categories may be bool, int, finite float, str,
+    or None; None is an explicit category, not an absent attribute. All training
+    rows must have the same feature names. Predictions require every training
+    feature and reject categories absent from training. Values observed in the
+    full training set but absent at a particular node use that node's training
+    majority through an explicit fallback leaf. Majority ties favour True.
+
+    ``max_depth`` counts edges from the root, so zero fits a single leaf.
+    ``min_samples_leaf`` applies to nonempty training partitions, not synthetic
+    fallback branches. Zero-gain splits remain eligible, allowing XOR learning.
+    Training and validation dictionaries are never modified.
+    """
+
+    use_gain_ratio = False
+    use_default_depth = False
+    use_pruning = False
+
+    def __init__(self, dataset, max_depth=None, min_samples_leaf=1, validation_dataset=None):
+        super().__init__(dataset)
+        if max_depth is not None and (type(max_depth) is not int or max_depth < 0):
+            raise ValueError("max_depth must be a nonnegative integer or None.")
+        if type(min_samples_leaf) is not int or min_samples_leaf < 1:
+            raise ValueError("min_samples_leaf must be a positive integer.")
+        if validation_dataset is not None and not self.use_pruning:
+            raise ValueError("validation_dataset is only used by pruned-dtl.")
+        self.max_depth = max_depth
+        self.min_samples_leaf = min_samples_leaf
+        self.validation_dataset = validation_dataset
+
+    @staticmethod
+    def _category_key(value):
+        if type(value) not in (bool, int, float, str, type(None)):
+            raise ValueError("Categories must be bool, int, finite float, str, or None.")
+        if type(value) is float and not isfinite(value):
+            raise ValueError("Float categories must be finite.")
+        return type(value).__name__, repr(value)
+
+    def _training_schema(self, examples):
+        if not examples:
+            raise ValueError("Training data must contain at least one example.")
+        if not all(isinstance(example, Mapping) for example in examples):
+            raise ValueError("Training examples must be mappings.")
+        names = [name for name in examples[0] if name != "target"]
+        if any(type(name) is not str for name in names):
+            raise ValueError("Attribute names must be strings.")
+        names.sort()
+        expected = set(names) | {"target"}
+        for example in examples:
+            if set(example) != expected:
+                raise ValueError("Training rows must have identical attributes and a target.")
+            if type(example["target"]) is not bool:
+                raise ValueError("Training targets must be booleans.")
+        domains = []
+        for name in names:
+            values_by_key = {}
+            for example in examples:
+                value = example[name]
+                key = self._category_key(value)
+                values_by_key[key] = value
+            values = tuple(values_by_key[key] for key in sorted(values_by_key))
+            # Python dictionary branches equate True, 1, and 1.0. Reject mixed
+            # numeric aliases rather than silently merging distinct categories.
+            if len(set(values)) != len(values):
+                raise ValueError(f"Ambiguous equal-valued categories for attribute {name!r}.")
+            domains.append((name, values))
+        return tuple(domains)
+
+    def find_hypothesis(self):
+        self.domains_ = self._training_schema(self.dataset.examples)
+        examples = [dict(example) for example in self.dataset.examples]
+        self.max_depth_ = self.max_depth
+        if self.max_depth_ is None and self.use_default_depth:
+            self.max_depth_ = int(log2(len(examples)))
+        self._node_majorities = {}
+        self._domains_by_name = dict(self.domains_)
+        self.tree_ = self._grow(examples, [name for name, _ in self.domains_], depth=0)
+        self.pruning_summary_ = None
+        if self.use_pruning:
+            if self.validation_dataset is None or not self.validation_dataset.examples:
+                raise ValueError("pruned-dtl requires nonempty, separately supplied validation data.")
+            if not all(isinstance(example, Mapping) for example in self.validation_dataset.examples):
+                raise ValueError("Validation examples must be mappings.")
+            validation = [dict(example) for example in self.validation_dataset.examples]
+            for example in validation:
+                _validate_categorical_example(example, self.domains_)
+                if type(example.get("target")) is not bool:
+                    raise ValueError("Validation targets must be booleans.")
+            before_nodes = self._measure_tree(self.tree_)["nodes"]
+            before_correct = self._correct(self.tree_, validation)
+            self._pruning_replacements = 0
+            self.tree_ = self._prune(self.tree_, validation)
+            self.pruning_summary_ = {
+                "validation_samples": len(validation),
+                "validation_correct_before": before_correct,
+                "validation_correct_after": self._correct(self.tree_, validation),
+                "replacement_count": self._pruning_replacements,
+                "nodes_removed": before_nodes - self._measure_tree(self.tree_)["nodes"],
+            }
+        expression = to_logic_expression(self.tree_)
+        return _ValidatedDisjunction(expression.conjunctions, self.domains_)
+
+    def fit(self):
+        # A failed refit must not expose a new tree with an old DNF hypothesis.
+        # Removing fitted state also ensures a second fit has no shared depth
+        # counter or pruning residue from its predecessor.
+        fitted_names = ("hypothesis", "tree_", "domains_", "max_depth_", "pruning_summary_",
+                        "_node_majorities", "_domains_by_name", "_pruning_replacements")
+        for name in fitted_names:
+            self.__dict__.pop(name, None)
+        try:
+            self.hypothesis = self.find_hypothesis()
+        except Exception:
+            for name in fitted_names:
+                self.__dict__.pop(name, None)
+            raise
+
+    def predict(self, example):
+        self._require_fitted()
+        # Keep the DNF as an inspectable equivalent hypothesis, while evaluating
+        # the retained tree along one path for routine inference.
+        return self.predict_tree(example)
+
+    def _grow(self, examples, attributes, depth):
+        majority = plurality_value(examples)
+        if (same_target(examples) or not attributes
+                or (self.max_depth_ is not None and depth >= self.max_depth_)):
+            return Leaf(majority)
+        best_name, best_groups, best_score = None, None, None
+        entropy = binary_entropy(examples)
+        for name in attributes:
+            groups = {}
+            for example in examples:
+                groups.setdefault(example[name], []).append(example)
+            if len(groups) < 2 or any(len(group) < self.min_samples_leaf for group in groups.values()):
+                continue
+            weighted_entropy = sum(len(group) / len(examples) * binary_entropy(group)
+                                   for group in groups.values())
+            score = max(0.0, entropy - weighted_entropy)
+            if self.use_gain_ratio:
+                split_info = -sum(len(group) / len(examples) * log2(len(group) / len(examples))
+                                  for group in groups.values())
+                score /= split_info
+            # Attribute names are sorted, and close scores retain the first.
+            if best_score is None or score > best_score + 1e-12:
+                best_name, best_groups, best_score = name, groups, score
+        if best_name is None:
+            return Leaf(majority)
+        node = Node(best_name)
+        self._node_majorities[id(node)] = majority
+        remaining = [name for name in attributes if name != best_name]
+        for value in self._domains_by_name[best_name]:
+            subset = best_groups.get(value)
+            node.branches[value] = (self._grow(subset, remaining, depth + 1)
+                                    if subset else Leaf(majority))
+        return node
+
+    @staticmethod
+    def _tree_prediction(tree, example):
+        while isinstance(tree, Node):
+            tree = tree.branches[example[tree.attr_name]]
+        return tree.target
+
+    def _correct(self, tree, examples):
+        return sum(self._tree_prediction(tree, example) == example["target"] for example in examples)
+
+    def _prune(self, tree, validation):
+        if isinstance(tree, Leaf):
+            return tree
+        for value, child in tree.branches.items():
+            routed = [example for example in validation if example[tree.attr_name] == value]
+            tree.branches[value] = self._prune(child, routed)
+        majority = self._node_majorities[id(tree)]
+        leaf_correct = sum(example["target"] == majority for example in validation)
+        # Ties prefer the smaller tree, including subtrees with no validation
+        # observations. The majority is learned from training data only.
+        if leaf_correct >= self._correct(tree, validation):
+            self._pruning_replacements += 1
+            return Leaf(majority)
+        return tree
+
+    def _require_fitted(self):
+        if not hasattr(self, "hypothesis"):
+            raise ValueError("Call fit() before prediction, tracing, or tree metrics.")
+
+    def predict_tree(self, example):
+        """Evaluate the retained tree, using the same contract as the DNF."""
+        self._require_fitted()
+        _validate_categorical_example(example, self.domains_)
+        return self._tree_prediction(self.tree_, example)
+
+    def trace(self, example):
+        """Return the traversed attribute/value decisions and final prediction."""
+        self._require_fitted()
+        _validate_categorical_example(example, self.domains_)
+        path, tree = [], self.tree_
+        while isinstance(tree, Node):
+            value = example[tree.attr_name]
+            path.append({"attribute": tree.attr_name, "value": value})
+            tree = tree.branches[value]
+        return {"path": path, "prediction": tree.target}
+
+    @staticmethod
+    def _measure_tree(tree):
+        metrics = {"depth": 0, "nodes": 0, "leaves": 0, "positive_rules": 0, "literals": 0}
+        pending = [(tree, 0)]
+        while pending:
+            current, depth = pending.pop()
+            metrics["nodes"] += 1
+            metrics["depth"] = max(metrics["depth"], depth)
+            if isinstance(current, Leaf):
+                metrics["leaves"] += 1
+                if current.target:
+                    metrics["positive_rules"] += 1
+                    metrics["literals"] += depth
+            else:
+                pending.extend((child, depth + 1) for child in current.branches.values())
+        return metrics
+
+    def tree_metrics(self):
+        """Return edge depth, total nodes, leaves, positive rules, and literals."""
+        self._require_fitted()
+        return self._measure_tree(self.tree_)
+
+
+@AlgorithmRegistry.register("gain-ratio")
+class GainRatioTreeLearner(CorrectedDecisionTreeLearner):
+    """Gain-ratio DTL without an automatic depth limit."""
+
+    use_gain_ratio = True
+
+
+@AlgorithmRegistry.register("depth-limited")
+class DepthLimitedTreeLearner(CorrectedDecisionTreeLearner):
+    """Information-gain DTL with a path-local depth limit."""
+
+    use_default_depth = True
+
+
+@AlgorithmRegistry.register("gain-depth")
+class GainDepthTreeLearner(CorrectedDecisionTreeLearner):
+    """Gain-ratio DTL with a path-local depth limit."""
+
+    use_gain_ratio = True
+    use_default_depth = True
+
+
+@AlgorithmRegistry.register("pruned-dtl")
+class PrunedDecisionTreeLearner(CorrectedDecisionTreeLearner):
+    """Information-gain DTL with bottom-up reduced-error validation pruning."""
+
+    use_pruning = True
