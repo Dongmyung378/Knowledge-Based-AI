@@ -1,0 +1,9 @@
+{
+  "scope": "Localized rule labels from the unchanged saved explanatory model; no training or benchmark rerun.",
+  "source_model_sha256": "9882dd8ff37c5848786662be75dc1179cb20c6ea1b0840372386115c756f5e29",
+  "renderer_sha256": "f4e4ebe8de3e97cea941aa39ba5d7460e2876b81c18338de68354f6df382c3da",
+  "files": {
+    "figures/ko/symbolic-rules.svg": "a47061ab9ef7cbeaa6e5d43a5b8c9aa45b097a134850d39f768ce9ba641533ea",
+    "figures/ko/symbolic-rules.png": "6ea78a7afb73ba956bb1e8b68345a19c5a23e85a8b856e1e8f959131bdbb389f"
+  }
+}

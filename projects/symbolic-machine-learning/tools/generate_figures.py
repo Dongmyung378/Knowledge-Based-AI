@@ -1,6 +1,7 @@
 """Render bilingual portfolio figures directly from the published raw reports."""
 from __future__ import annotations
 
+import argparse
 import hashlib
 import itertools
 import json
@@ -15,8 +16,6 @@ from matplotlib.colors import LinearSegmentedColormap
 
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT))
-from learning.attr_learner import GainDepthTreeLearner, Leaf  # noqa: E402
-from learning.util import Dataset  # noqa: E402
 
 INK, AMBER, SLATE, RED, CREAM = '#29283F', '#A66A13', '#6B7C91', '#A74648', '#F7F3EA'
 COLORS = ['#B7AF9C', SLATE, RED, '#A39CAF', '#827995', '#6D637F', '#5B516E', AMBER, '#3F6374']
@@ -43,12 +42,17 @@ def configure(language):
 def save(figure, language, name):
     folder = PROJECT / 'figures' / language
     folder.mkdir(parents=True, exist_ok=True)
-    figure.savefig(folder / f'{name}.svg', bbox_inches='tight', metadata={'Date': None, 'Creator': 'Symbolic learning report renderer'})
+    svg = folder / f'{name}.svg'
+    figure.savefig(svg, bbox_inches='tight', metadata={'Date': None, 'Creator': 'Symbolic learning report renderer'})
+    svg.write_text('\n'.join(line.rstrip() for line in svg.read_text(encoding='utf-8').splitlines()) + '\n',
+                   encoding='utf-8', newline='\n')
     figure.savefig(folder / f'{name}.png', bbox_inches='tight', dpi=160, metadata={'Software': 'Symbolic learning report renderer'})
     plt.close(figure)
 
 
 def explanation():
+    from learning.attr_learner import GainDepthTreeLearner, Leaf
+    from learning.util import Dataset
     rows = [dict(zip(['A', 'B', 'C'], values)) for values in itertools.product([False, True], repeat=3)]
     for row in rows:
         row['target'] = (row['A'] and row['B']) or row['C']
@@ -169,11 +173,12 @@ def render_rules(demo, language):
         x1, y1, _ = positions[parent]
         x2, y2, _ = positions[child]
         ax.plot([x1, x2], [-y1, -y2], color=SLATE, linewidth=1.4)
-        ax.text((x1 + x2) / 2, -(y1 + y2) / 2 + 0.03, label, ha='center', fontsize=8,
+        display_label = {'False': '거짓', 'True': '참'}[label] if language == 'ko' else label
+        ax.text((x1 + x2) / 2, -(y1 + y2) / 2 + 0.03, display_label, ha='center', fontsize=8,
                 bbox={'facecolor': CREAM, 'edgecolor': 'none', 'pad': 1.5})
     for _, (x, depth, node) in positions.items():
         leaf = 'prediction' in node
-        text = str(node['prediction']).upper() if leaf else node['attribute']
+        text = ('참' if node['prediction'] else '거짓') if leaf and language == 'ko' else str(node['prediction']).upper() if leaf else node['attribute']
         ax.text(x, -depth, text, ha='center', va='center', color='white' if leaf else INK,
                 bbox={'boxstyle': 'round,pad=0.55', 'facecolor': AMBER if leaf else '#E5DFD1', 'edgecolor': 'none'}, zorder=4)
     ax.set_xlim(-0.04, 1.04)
@@ -185,10 +190,30 @@ def render_rules(demo, language):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--language', choices=['en', 'ko', 'both'], default='both')
+    parser.add_argument('--only-rules', action='store_true',
+                        help='Render the saved explanatory model only; leave raw reports and the saved model unchanged.')
+    args = parser.parse_args()
+    languages = ['en', 'ko'] if args.language == 'both' else [args.language]
+    if args.only_rules:
+        source = PROJECT / 'examples/explanation.json'
+        demo = json.loads(source.read_text(encoding='utf-8'))
+        for language in languages:
+            configure(language)
+            render_rules(demo, language)
+        provenance = {'scope': 'Localized rule labels from the unchanged saved explanatory model; no training or benchmark rerun.',
+                      'source_model_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),
+                      'renderer_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+                      'files': {f'figures/{language}/symbolic-rules.{suffix}': hashlib.sha256((PROJECT / f'figures/{language}/symbolic-rules.{suffix}').read_bytes()).hexdigest()
+                                for language in languages for suffix in ['svg', 'png']}}
+        (PROJECT / 'figures/rules-localization.json').write_text(json.dumps(provenance, indent=2) + '\n', encoding='utf-8', newline='\n')
+        print(json.dumps({'status': 'passed', 'languages': languages, 'only_rules': True}))
+        return
     filenames = ['attribute-evaluation.json', 'inference-evaluation.json', 'foil-final-greedy.json', 'foil-final-lookahead.json']
     reports = [json.loads((PROJECT / 'reports' / name).read_text(encoding='utf-8')) for name in filenames]
     demo = explanation()
-    for language in ['en', 'ko']:
+    for language in languages:
         configure(language)
         render_accuracy(reports[0], language)
         render_complexity(reports[0], reports[1], language)
@@ -199,7 +224,8 @@ def main():
                   'renderer_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                   'scope': 'Every numerical chart is generated from raw reports. The small rule illustration uses an actual fitted explanatory model and is not a held-out result.'}
     (PROJECT / 'figures/provenance.json').write_text(json.dumps(provenance, indent=2) + '\n', encoding='utf-8')
-    print(json.dumps({'status': 'passed', 'languages': 2, 'svg_figures': 8, 'png_figures': 8}))
+    print(json.dumps({'status': 'passed', 'languages': len(languages),
+                      'svg_figures': 4 * len(languages), 'png_figures': 4 * len(languages)}))
 
 
 if __name__ == '__main__':

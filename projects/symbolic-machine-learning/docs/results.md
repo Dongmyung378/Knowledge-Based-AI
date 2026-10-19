@@ -64,6 +64,8 @@ The learned DNF remains available as an explanation. Maintained prediction trave
 
 ![A learned tree and its equivalent logical expression](../figures/en/symbolic-rules.svg)
 
+English and Korean rule figures use the same saved explanatory tree. To update only its Korean labels without fitting a model or touching benchmark records, run `python tools/generate_figures.py --language ko --only-rules` from this project directory. The command records the saved-model and generated-file hashes in `figures/rules-localization.json`.
+
 The figure is an explanatory `(A AND B) OR C` example learned on all eight Boolean inputs, not an additional held-out performance result.
 
 The separate final inference experiment used **12 fitted models**, each checked on its complete **1,024-input Boolean space**, for **12,288 identical tree and DNF predictions**. Each condition alternated execution order, used one warm-up pass, and recorded seven measured passes per path. The **median of condition-level batch-time reductions was 68.31%**.
