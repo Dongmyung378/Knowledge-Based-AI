@@ -22,6 +22,8 @@ Boolean prediction                    Relation coverage prediction
 
 ## Decision trees and readable logic
 
+A tree asks a sequence of questions about input features. Each **node** is a question or final **leaf**, and the path from the root to a leaf explains one prediction. **Entropy** measures uncertainty about the labels. **Information gain** measures the reduction in that uncertainty after a split, while **gain ratio** adjusts for how the split distributes examples. The resulting **DNF** expression joins conditions along each positive path with AND, then joins those alternative paths with OR.
+
 `dtl` chooses an attribute by information gain. A unanimous partition becomes a leaf; an exhausted partition falls back to the majority class. Positive root-to-leaf paths are converted into conjunctions, then joined into a disjunction. This conversion makes the learned classification rule inspectable without a separate explanation model.
 
 The initial `my-dtl` combines gain ratio with one shared, post-order growth counter. That counter is preserved in the initial snapshot and explicitly identified as a historical implementation. A path-depth limit instead passes the current depth into each recursive call, so one sibling cannot consume another sibling's depth budget. These are different controls and their results must not be conflated.
@@ -45,6 +47,8 @@ The controlled benchmark adds a majority-class baseline and a validation-tuned `
 The maintained variants require every training feature at prediction time and reject unseen feature categories. They accept explicit `None` as a categorical value, Boolean labels and finite scalar categories. A category observed somewhere in training but absent from a particular partition uses that node's learned majority fallback. These contracts belong to the maintained variants; the initial learners remain available for historical comparisons.
 
 ## FOIL and Prolog ownership
+
+**FOIL** learns a target relation from examples and known facts. A **predicate** names a relation, such as an edge between graph nodes; a **literal** is a condition using such a relation. A learned **Horn clause** connects those conditions to a conclusion. **Bindings** assign actual input objects to the rule's variables. The learner adds conditions that keep positive examples covered while excluding negative ones; the Prolog runtime checks whether those conditions hold.
 
 FOIL starts with an uncovered positive example set, adds candidate literals to specialise a clause, and repeats the covering loop to learn additional clauses. The Prolog knowledge base supplies the allowed background relations. Learned hypotheses remain ordinary Horn clauses that can be printed and queried.
 

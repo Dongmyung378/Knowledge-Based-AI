@@ -6,6 +6,14 @@ Two learning systems implemented from first principles: a decision-tree learner 
 
 The original development period was **February–May 2025**. The maintained release preserves the initial algorithms and experiments, adds exact path-depth and validation-pruned tree variants, separates model selection from final testing, and gives relational search explicit failure and runtime budgets.
 
+## Understand the task
+
+**Symbolic learning** produces explicit rules that can be read and executed. In the attribute path, each example contains feature values and a true/false label. **DTL**, or decision-tree learning, chooses questions about those features and ends at a predicted label. The same decision can also be written as a logical expression: a conjunction joins conditions with AND, while a disjunction joins alternatives with OR.
+
+The relational path uses examples of whether a relationship holds, together with known background facts. **FOIL** (First Order Inductive Learner) learns rules connecting those facts to the target relationship. For example, graph edges are known facts and reachability is the relationship to learn. **Prolog** executes logical queries, **SWI-Prolog** is its runtime, and **PySwip** connects that runtime to Python. A learned **Horn clause** says that a conclusion holds when its listed conditions hold.
+
+The outputs are a learned tree or rules, predictions for examples, and traces showing which decisions or rules were used. The experiments ask whether the learned rules generalise to examples withheld from training, how complex those rules become, and whether learning finishes within its resource limits.
+
 ## What this project demonstrates
 
 - Entropy, information gain, gain ratio and symbolic tree-to-logic conversion.
@@ -17,6 +25,8 @@ The original development period was **February–May 2025**. The maintained rele
 The original coursework supplied the code skeleton, dataset generation utilities, evaluation scaffolding and public tests. The implemented learning logic and subsequent maintenance are distinguished from those supplied materials. Original assignment and lecture PDFs remain under [`references/`](references/).
 
 ## Learning approaches
+
+**Information gain** measures how much a split reduces uncertainty about the label; **gain ratio** adjusts it by how broadly the attribute partitions the data. A **depth limit** caps the number of steps from the root to a final leaf. **Pruning** removes branches after training when validation data supports a simpler tree. These are separate choices about how to split data and how much detail the tree may retain.
 
 | Name | Split criterion | Growth control | Purpose |
 | --- | --- | --- | --- |
@@ -62,6 +72,8 @@ python evaluate_rules.py -a foil -d tests/graph_small.json -k tests/graph_small.
 
 The maintained attribute CLI corrects the initial evaluation protocol: `eval-noisy` now uses a clean independent hold-out, training-only label flips and a shared concept/split across algorithms and noise levels. `eval-time` shares pre-generated inputs and rotates execution order. The initial report's commands reproduce the old protocol only from the preserved snapshot, not from this maintained CLI. `pruned-dtl` requires a separate validation set and is supported by the controlled benchmark rather than these simple attribute commands.
 
+A **seed** is the starting value used to reproduce random data generation and splitting. Repeating the comparison with different seeds checks whether a result depends on one favourable draw. **Training** examples fit the rules; **validation** examples select settings such as depth; **held-out** examples are kept aside from that fitting. Development hold-outs select the candidate policy, then distinct final evaluation cases measure that fixed choice without selecting it again.
+
 The maintained comparison has a checked-in plan and separate development and evaluation phases:
 
 ```bash
@@ -75,6 +87,8 @@ Algorithms receive the same generated concept, examples, split and training-labe
 The benchmark compares nine conditions: the seven registered tree learners plus a majority-class predictor and `gain-depth-tuned`, which chooses a depth on the inner validation split. Candidate policies are selected on separate outer development hold-outs and frozen before running the distinct evaluation seeds.
 
 ## Inspect predictions
+
+**DNF** (disjunctive normal form) writes the positive decision paths as OR-connected groups of AND conditions. A **node** is a decision point or final leaf; counting nodes and path depth helps compare model complexity. A prediction trace follows the conditions used for one input, making the reported rule inspectable.
 
 Open [`demo/index.html`](demo/index.html) directly in a browser for the offline interactive explanation. Change A, B and C, follow the exported learned tree and compare its result with the exported DNF. The model was trained on all eight inputs for explanation; the demo is not a held-out score. Rebuild both language versions with `python tools/build_demo.py`.
 
@@ -92,6 +106,10 @@ with FOIL(dataset=dataset, recursive=True) as learner:
 The trace identifies matching learned clauses and input bindings; it is not a complete Prolog proof tree. Candidate exhaustion, budget exhaustion, query failures and cleanup failures are distinguishable. See [architecture and supported scope](docs/architecture.md).
 
 ## Results and initial records
+
+**Balanced accuracy** gives equal weight to correctly recognising positive and negative examples, so a more common label does not dominate the result. **pp** means percentage points, the arithmetic difference between two percentages. The **frozen representative** is the policy selected before the final test, not a claim that it has the highest score in every later comparison.
+
+Tree/DNF agreement checks whether two ways of executing the same learned rule return identical predictions; it does not measure correctness against unseen labels. **FOIL completion** counts whole cases that finish within the search budget and should be read separately from the prediction accuracy of completed cases. Regression-test counts check software behavior rather than model accuracy.
 
 <span id="verified-smoke-experiments-2026-10-05"></span>
 

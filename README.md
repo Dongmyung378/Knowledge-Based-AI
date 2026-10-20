@@ -4,6 +4,10 @@
 
 A curated portfolio of three projects from COMP24412, covering automated theorem proving, logic programming, and symbolic machine learning. The repository is organised around the work itself: each project explains the problem, implementation, reproducible workflow, and technical trade-offs.
 
+Here, **knowledge-based AI** represents facts and rules explicitly so a reader can inspect the reasoning. Automated reasoning asks whether a conclusion follows from given facts. Logic programming uses rules to check a proposed design. Symbolic machine learning reverses that direction: it starts from labelled examples and learns a decision tree or rules that can explain new predictions.
+
+For the portfolio's learning project, start with **Symbolic Machine Learning** below. It accepts generated attribute examples or known graph relationships and produces readable classification rules, prediction traces and evaluation reports. The other two projects provide related logic background and have their own execution paths.
+
 ## Portfolio at a glance
 
 | Project | Focus | What it demonstrates | Core technologies |

@@ -2,6 +2,12 @@
 
 [English](results.md) | [한국어](results.ko.md) | [Project README](../README.md)
 
+## How to read the experiment
+
+The attribute experiment learns true/false rules from generated examples. **Training** data fits a tree, **validation** data selects settings, and **held-out** data is excluded from that fitting. Development hold-outs choose the representative policy; distinct final evaluation cases assess that fixed choice. A **seed** makes random generation and splitting reproducible, so multiple seeds test sensitivity to different generated cases.
+
+**Accuracy** is the proportion of correct labels. **Balanced accuracy** averages the fraction of actual positives and actual negatives correctly recognised, giving the two classes equal weight. **Percentage points** express the difference between percentage scores. Node counts describe tree complexity, and fit/tuning times describe different computational costs. No single column captures all of these trade-offs.
+
 ## Result and scope
 
 The policy selected before final evaluation, **`gain-depth-tuned`**, achieved **76.25% mean test balanced accuracy**, compared with **64.08%** for the preserved initial `my-dtl` on the same 240 cases: **+12.17 percentage points**. The initial information-gain `dtl` achieved 69.88%.
@@ -49,6 +55,8 @@ The paired representative-minus-initial-`my-dtl` difference is **+12.17 percenta
 
 ## Representative results by concept family
 
+A **conjunction** requires every listed condition to be true; **sparse DNF** accepts any of a small set of AND-connected condition groups. **XOR** is true when an odd number of its relevant Boolean inputs are true. The **random-truth negative control** assigns unrelated labels, testing whether the evaluation also shows the expected lack of learnable structure.
+
 | Family | Initial `my-dtl` balanced accuracy | Representative balanced accuracy |
 | --- | ---: | ---: |
 | Conjunction | 76.61% | 95.08% |
@@ -84,6 +92,8 @@ This is CPU batch prediction for the same learned hypotheses and valid complete 
 Search stopped after the declared depth grid, one reduced-error-pruning candidate and the equivalent tree-execution experiment. Lower-scoring conditions remain visible as comparisons and supported implementations. The initial source snapshot and historical tables were not overwritten.
 
 ## FOIL finite-graph completion
+
+Here the task is to learn whether one node can reach another through known graph edges. **Greedy search** chooses the next condition by its immediate improvement. **Look-ahead** also considers the combined benefit of a pair of conditions when a single condition cannot improve the rule. **Completion** means learning ended within its limits; a completed rule can still predict incorrectly. The table therefore separates completion, fully correct cases and failures before reporting accuracy only for completed cases.
 
 The default greedy search is retained. An optional `lookahead=2` mode addresses a specific greedy dead end: when no one-literal extension has positive gain, it can consider a first literal that preserves positive bindings at zero gain and a second literal whose combined gain is positive. If a positive-gain one-literal extension exists, the original greedy choice is used. This is a bounded extension, not an unrestricted rule search.
 

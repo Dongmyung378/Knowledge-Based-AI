@@ -4,13 +4,13 @@
   "files": [
     {
       "path": "README.ko.md",
-      "sha256": "9fc4437df6b0ff45f0b0e016c18f39f9623622df627bf8b1094ac69803d1cd39",
-      "size_bytes": 12304
+      "sha256": "6e30d380f20248a7a514bd4f2c67d76dd5db71b52f28c67c975843a100944ed4",
+      "size_bytes": 16155
     },
     {
       "path": "README.md",
-      "sha256": "2926c0f3966d6436312222a42d7001c6f3585ad11b07e826bc3b3754e299e8a0",
-      "size_bytes": 11767
+      "sha256": "fa8537fbea00359ff5b0122bcc6e1259f7b4d5c16be3c27624c2a4c14c78027b",
+      "size_bytes": 15013
     },
     {
       "path": "configs/adoption.json",
@@ -34,13 +34,13 @@
     },
     {
       "path": "docs/architecture.ko.md",
-      "sha256": "515697d32d7c88cf9225febd419dbed8fa583b8358ac5654acd85d627948015c",
-      "size_bytes": 9159
+      "sha256": "bdac51bb245a9c51f3931cdf852319b602140e91b184ccd60caff533b72bcdf0",
+      "size_bytes": 10259
     },
     {
       "path": "docs/architecture.md",
-      "sha256": "0825ed5c8e10fd73935c0806613b721e482d2faa086cada6fe4a4cd4bd05c773",
-      "size_bytes": 8374
+      "sha256": "07239ea645104a29d86c4922b80a5ae092e67348baad99485e03f9e60ba8c0b8",
+      "size_bytes": 9346
     },
     {
       "path": "docs/evaluation-guide.ko.md",
@@ -74,13 +74,13 @@
     },
     {
       "path": "docs/results.ko.md",
-      "sha256": "b30f5fd36f2a71507c1cd85e218725f612743b21f5b79e6bc91dcf6ec1cc2f8e",
-      "size_bytes": 11298
+      "sha256": "40e4e6ddc6d973e7641e5b6797d729aae53346c72462fdfc05a9eca90078b694",
+      "size_bytes": 13451
     },
     {
       "path": "docs/results.md",
-      "sha256": "a5053dd2821812a0dad4d1efdf564d0c3dca61d3190dcd36071d01f2698e2152",
-      "size_bytes": 10440
+      "sha256": "19084e6bd1bfe25911ee3719f703ed3e063c04ccc765d0028d2e9e1904c9ae27",
+      "size_bytes": 12209
     },
     {
       "path": "docs/validation.ko.md",
