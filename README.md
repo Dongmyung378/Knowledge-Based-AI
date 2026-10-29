@@ -88,6 +88,8 @@ On Windows PowerShell activate with `.\.venv\Scripts\Activate.ps1`. See the [pro
 
 The initial 2026-10-05 smoke verification passed 30 tests and remains a historical record. The maintained release was verified from an actual extracted source ZIP in fresh environments on the same PC: Windows passed 151 tests with two permission-related symlink skips, and Linux/WSL passed all 153 tests. Both environments passed all five guarded stages, including the actual Prolog query and native process shutdown. See the [executed environments and evidence](projects/symbolic-machine-learning/docs/validation.md). Vampire is needed only for the separate automated-reasoning workflow.
 
+The current source ZIP also includes PySwip **0.3.3+argv1**, a documented initialization-argument lifetime fix. A later clean-environment run exposed intermittent shutdown failures in the upstream binding, so earlier successful runs are retained as historical evidence rather than a guarantee. See the [current validation record](projects/symbolic-machine-learning/docs/validation.md).
+
 ## Documentation
 
 Every Markdown document is written in English by default and links to a Korean counterpart. Start with an individual project README for technical details. The symbolic-learning [architecture](projects/symbolic-machine-learning/docs/architecture.md) and [reproduction guide](projects/symbolic-machine-learning/docs/reproduce.md) explain the maintained workflow; the [initial experiment report](projects/symbolic-machine-learning/docs/experiment-report.md) is preserved as a historical record.

@@ -1,4 +1,4 @@
-git+https://github.com/yuce/pyswip@c07e8083c6a58eb7de99bb26c8dc89a0c215f52c#egg=pyswip
+./vendor/pyswip
 pytest
 scipy
 click

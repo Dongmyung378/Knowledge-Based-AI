@@ -2,7 +2,15 @@
 
 [English](validation.md) | [한국어](validation.ko.md) | [Project README](../README.md)
 
-## Environment boundaries
+## Downloaded ZIP recheck and native binding fix
+
+The 2026-10-29 clean-environment recheck found an intermittent `PL_cleanup` access violation after an otherwise passing test run. Earlier successful runs below remain valid records of those executions; they did not exclude this intermittent defect. A direct native probe found that upstream PySwip had already released the argument vector retained by SWI-Prolog. The local **0.3.3+argv1** package retains that vector and its strings, supplies its terminal NULL and leaves normal cleanup enabled. See the [patch and upstream provenance](../vendor/pyswip/PATCH.md).
+
+The new regression checks inspect the actual native pointers before and after memory allocation, execute a real query and wait for normal interpreter exit. They supplement the existing algorithm tests rather than changing evaluation data or scores. The new [execution receipt](../reports/clean-room-20261029.json) records the current ZIP-based Windows and Linux checks and their limits.
+
+Windows completed **five full guarded runs**, each with **155 passed and two permission-related skips**. Linux completed **one full run with 157 passed and no skips**. All stages exited with code zero and empty stderr, including 24 isolated argument-lifetime probes across these runs.
+
+## Earlier environment verification
 
 | Executed environment | Runtime | Confirmed scope |
 | --- | --- | --- |

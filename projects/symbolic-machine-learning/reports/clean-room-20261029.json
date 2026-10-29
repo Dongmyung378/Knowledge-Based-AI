@@ -1,0 +1,684 @@
+{
+  "schema": "symbolic-clean-room/v1",
+  "date": "2026-10-29",
+  "passed": true,
+  "tested_candidate_sha256": "29f561980412ad0bd07ec3ea9cfec9072da706156af6726cb9607c3150165aae",
+  "cause": "The upstream PySwip PL_initialise wrapper released its temporary ctypes argv vector while SWI-Prolog retained the pointer. A direct native pointer probe failed before the patch and passed afterwards.",
+  "patch": "Vendored upstream c07e8083c6a58eb7de99bb26c8dc89a0c215f52c with retained, NULL-terminated argv and an explicit native signature; normal PL_cleanup preserved.",
+  "pyswip_version": "0.3.3+argv1",
+  "binding_source_sha256": "d344100e50606de7e9fdfe4b5ee5252af2d61ef785823c02efa8b2bebc2fe80a",
+  "regression_test_sha256": "5880953ca64f827e9bb175fe2ee85e995c4927379a42b56396adcf3c9ecda487",
+  "before_probe_valid": false,
+  "after_probe_valid": true,
+  "windows_full_runs": 5,
+  "linux_full_runs": 1,
+  "isolated_argv_probe_processes": 24,
+  "runs": [
+    {
+      "label": "fixed-verification-1",
+      "environment": {
+        "python": "3.12.7",
+        "system": "Windows",
+        "machine": "AMD64",
+        "packages": {
+          "pyswip": "0.3.3+argv1",
+          "pytest": "9.1.1",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "click": "8.5.0",
+          "networkx": "3.7",
+          "tabulate": "0.10.0"
+        }
+      },
+      "source_sha256": {
+        "learning/attr_learner.py": "9f2c62f08d0348cc2b2f0da3a89b96a25d14f2ecf5fbbe3d393bdaeb4852f393",
+        "learning/rule_learner.py": "4077899473e6de6a1a1674d4d6f3cf5a82109d5c594bfe8f6f21d61d412d4031",
+        "evaluate_attributes.py": "4a6ad682608fe039d33673658f485c1a91e5d128c4822e792ad41621ecba6267",
+        "evaluate_rules.py": "201df10fbad1349983662d09a33d53e372c394eb55d6dbd93da5d994d8c303ca",
+        "tools/run_checks.py": "b6c35f98f65693c61ea580d1fe6e00cf4636f1b30616fc9b4e3c60a732c9eb7d",
+        "tools/check_environment.py": "d00755e9db29b1f5d2a06d0fab0cd1e3949c1a5be441c58f9d1b54c48a9b777c",
+        "tools/verify_release.py": "03fec2ac5c4e588517657a084d7cbffd56d9d2f9f5c56e8d33cbafdf86043e1e",
+        "requirements.lock.txt": "f0b7a074d4190bb64f56cd68362469cbbcccefaf9d20f4f342b3d517bc4efa88",
+        "setup.cfg": "14034e24d26ffd934562b14d185a86cdeb4af96a1fab74ef2ae355828d1161ef"
+      },
+      "stages": [
+        {
+          "name": "release",
+          "status": "passed",
+          "duration_seconds": 0.37270909999642754,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "schema_version": 1,
+            "passed": true,
+            "payload_files": 115,
+            "initial_source_files": 27,
+            "initial_git_commit": "aa947038f923e98ec0bf16457745d538284ef45c"
+          }
+        },
+        {
+          "name": "environment",
+          "status": "passed",
+          "duration_seconds": 0.5940492000008817,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "passed": true,
+            "checks": {
+              "python_supported": true,
+              "dependencies_installed": true,
+              "swipl_cli": true,
+              "pyswip_query": true
+            },
+            "swi_prolog_version": "9.2.9"
+          }
+        },
+        {
+          "name": "pytest",
+          "status": "passed",
+          "duration_seconds": 17.271930700000667,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "tests": 157,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 2,
+            "passed": 155
+          }
+        },
+        {
+          "name": "dtl_smoke",
+          "status": "passed",
+          "duration_seconds": 1.3347326000002795,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "dtl": {
+              "correct": 4,
+              "examples": 4
+            },
+            "my-dtl": {
+              "correct": 4,
+              "examples": 4
+            }
+          }
+        },
+        {
+          "name": "foil_smoke",
+          "status": "passed",
+          "duration_seconds": 2.15777060000255,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "positive_examples": 12,
+            "negative_examples": 59,
+            "correct": 71,
+            "swi_prolog_version_number": 90209
+          }
+        }
+      ]
+    },
+    {
+      "label": "fixed-verification-2",
+      "environment": {
+        "python": "3.12.7",
+        "system": "Windows",
+        "machine": "AMD64",
+        "packages": {
+          "pyswip": "0.3.3+argv1",
+          "pytest": "9.1.1",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "click": "8.5.0",
+          "networkx": "3.7",
+          "tabulate": "0.10.0"
+        }
+      },
+      "source_sha256": {
+        "learning/attr_learner.py": "9f2c62f08d0348cc2b2f0da3a89b96a25d14f2ecf5fbbe3d393bdaeb4852f393",
+        "learning/rule_learner.py": "4077899473e6de6a1a1674d4d6f3cf5a82109d5c594bfe8f6f21d61d412d4031",
+        "evaluate_attributes.py": "4a6ad682608fe039d33673658f485c1a91e5d128c4822e792ad41621ecba6267",
+        "evaluate_rules.py": "201df10fbad1349983662d09a33d53e372c394eb55d6dbd93da5d994d8c303ca",
+        "tools/run_checks.py": "b6c35f98f65693c61ea580d1fe6e00cf4636f1b30616fc9b4e3c60a732c9eb7d",
+        "tools/check_environment.py": "d00755e9db29b1f5d2a06d0fab0cd1e3949c1a5be441c58f9d1b54c48a9b777c",
+        "tools/verify_release.py": "03fec2ac5c4e588517657a084d7cbffd56d9d2f9f5c56e8d33cbafdf86043e1e",
+        "requirements.lock.txt": "f0b7a074d4190bb64f56cd68362469cbbcccefaf9d20f4f342b3d517bc4efa88",
+        "setup.cfg": "14034e24d26ffd934562b14d185a86cdeb4af96a1fab74ef2ae355828d1161ef"
+      },
+      "stages": [
+        {
+          "name": "release",
+          "status": "passed",
+          "duration_seconds": 0.30367869999463437,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "schema_version": 1,
+            "passed": true,
+            "payload_files": 115,
+            "initial_source_files": 27,
+            "initial_git_commit": "aa947038f923e98ec0bf16457745d538284ef45c"
+          }
+        },
+        {
+          "name": "environment",
+          "status": "passed",
+          "duration_seconds": 0.534960000004503,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "passed": true,
+            "checks": {
+              "python_supported": true,
+              "dependencies_installed": true,
+              "swipl_cli": true,
+              "pyswip_query": true
+            },
+            "swi_prolog_version": "9.2.9"
+          }
+        },
+        {
+          "name": "pytest",
+          "status": "passed",
+          "duration_seconds": 16.25244019999809,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "tests": 157,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 2,
+            "passed": 155
+          }
+        },
+        {
+          "name": "dtl_smoke",
+          "status": "passed",
+          "duration_seconds": 1.3106154999986757,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "dtl": {
+              "correct": 4,
+              "examples": 4
+            },
+            "my-dtl": {
+              "correct": 4,
+              "examples": 4
+            }
+          }
+        },
+        {
+          "name": "foil_smoke",
+          "status": "passed",
+          "duration_seconds": 2.1694559000025038,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "positive_examples": 12,
+            "negative_examples": 59,
+            "correct": 71,
+            "swi_prolog_version_number": 90209
+          }
+        }
+      ]
+    },
+    {
+      "label": "fixed-verification-3",
+      "environment": {
+        "python": "3.12.7",
+        "system": "Windows",
+        "machine": "AMD64",
+        "packages": {
+          "pyswip": "0.3.3+argv1",
+          "pytest": "9.1.1",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "click": "8.5.0",
+          "networkx": "3.7",
+          "tabulate": "0.10.0"
+        }
+      },
+      "source_sha256": {
+        "learning/attr_learner.py": "9f2c62f08d0348cc2b2f0da3a89b96a25d14f2ecf5fbbe3d393bdaeb4852f393",
+        "learning/rule_learner.py": "4077899473e6de6a1a1674d4d6f3cf5a82109d5c594bfe8f6f21d61d412d4031",
+        "evaluate_attributes.py": "4a6ad682608fe039d33673658f485c1a91e5d128c4822e792ad41621ecba6267",
+        "evaluate_rules.py": "201df10fbad1349983662d09a33d53e372c394eb55d6dbd93da5d994d8c303ca",
+        "tools/run_checks.py": "b6c35f98f65693c61ea580d1fe6e00cf4636f1b30616fc9b4e3c60a732c9eb7d",
+        "tools/check_environment.py": "d00755e9db29b1f5d2a06d0fab0cd1e3949c1a5be441c58f9d1b54c48a9b777c",
+        "tools/verify_release.py": "03fec2ac5c4e588517657a084d7cbffd56d9d2f9f5c56e8d33cbafdf86043e1e",
+        "requirements.lock.txt": "f0b7a074d4190bb64f56cd68362469cbbcccefaf9d20f4f342b3d517bc4efa88",
+        "setup.cfg": "14034e24d26ffd934562b14d185a86cdeb4af96a1fab74ef2ae355828d1161ef"
+      },
+      "stages": [
+        {
+          "name": "release",
+          "status": "passed",
+          "duration_seconds": 0.2681783000007272,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "schema_version": 1,
+            "passed": true,
+            "payload_files": 115,
+            "initial_source_files": 27,
+            "initial_git_commit": "aa947038f923e98ec0bf16457745d538284ef45c"
+          }
+        },
+        {
+          "name": "environment",
+          "status": "passed",
+          "duration_seconds": 0.5016410000025644,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "passed": true,
+            "checks": {
+              "python_supported": true,
+              "dependencies_installed": true,
+              "swipl_cli": true,
+              "pyswip_query": true
+            },
+            "swi_prolog_version": "9.2.9"
+          }
+        },
+        {
+          "name": "pytest",
+          "status": "passed",
+          "duration_seconds": 16.05413110000518,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "tests": 157,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 2,
+            "passed": 155
+          }
+        },
+        {
+          "name": "dtl_smoke",
+          "status": "passed",
+          "duration_seconds": 1.2333175000021583,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "dtl": {
+              "correct": 4,
+              "examples": 4
+            },
+            "my-dtl": {
+              "correct": 4,
+              "examples": 4
+            }
+          }
+        },
+        {
+          "name": "foil_smoke",
+          "status": "passed",
+          "duration_seconds": 2.093293399993854,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "positive_examples": 12,
+            "negative_examples": 59,
+            "correct": 71,
+            "swi_prolog_version_number": 90209
+          }
+        }
+      ]
+    },
+    {
+      "label": "fixed-verification-4",
+      "environment": {
+        "python": "3.12.7",
+        "system": "Windows",
+        "machine": "AMD64",
+        "packages": {
+          "pyswip": "0.3.3+argv1",
+          "pytest": "9.1.1",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "click": "8.5.0",
+          "networkx": "3.7",
+          "tabulate": "0.10.0"
+        }
+      },
+      "source_sha256": {
+        "learning/attr_learner.py": "9f2c62f08d0348cc2b2f0da3a89b96a25d14f2ecf5fbbe3d393bdaeb4852f393",
+        "learning/rule_learner.py": "4077899473e6de6a1a1674d4d6f3cf5a82109d5c594bfe8f6f21d61d412d4031",
+        "evaluate_attributes.py": "4a6ad682608fe039d33673658f485c1a91e5d128c4822e792ad41621ecba6267",
+        "evaluate_rules.py": "201df10fbad1349983662d09a33d53e372c394eb55d6dbd93da5d994d8c303ca",
+        "tools/run_checks.py": "b6c35f98f65693c61ea580d1fe6e00cf4636f1b30616fc9b4e3c60a732c9eb7d",
+        "tools/check_environment.py": "d00755e9db29b1f5d2a06d0fab0cd1e3949c1a5be441c58f9d1b54c48a9b777c",
+        "tools/verify_release.py": "03fec2ac5c4e588517657a084d7cbffd56d9d2f9f5c56e8d33cbafdf86043e1e",
+        "requirements.lock.txt": "f0b7a074d4190bb64f56cd68362469cbbcccefaf9d20f4f342b3d517bc4efa88",
+        "setup.cfg": "14034e24d26ffd934562b14d185a86cdeb4af96a1fab74ef2ae355828d1161ef"
+      },
+      "stages": [
+        {
+          "name": "release",
+          "status": "passed",
+          "duration_seconds": 0.2914980999994441,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "schema_version": 1,
+            "passed": true,
+            "payload_files": 115,
+            "initial_source_files": 27,
+            "initial_git_commit": "aa947038f923e98ec0bf16457745d538284ef45c"
+          }
+        },
+        {
+          "name": "environment",
+          "status": "passed",
+          "duration_seconds": 0.4911634999953094,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "passed": true,
+            "checks": {
+              "python_supported": true,
+              "dependencies_installed": true,
+              "swipl_cli": true,
+              "pyswip_query": true
+            },
+            "swi_prolog_version": "9.2.9"
+          }
+        },
+        {
+          "name": "pytest",
+          "status": "passed",
+          "duration_seconds": 15.681934799998999,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "tests": 157,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 2,
+            "passed": 155
+          }
+        },
+        {
+          "name": "dtl_smoke",
+          "status": "passed",
+          "duration_seconds": 1.2019879999934346,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "dtl": {
+              "correct": 4,
+              "examples": 4
+            },
+            "my-dtl": {
+              "correct": 4,
+              "examples": 4
+            }
+          }
+        },
+        {
+          "name": "foil_smoke",
+          "status": "passed",
+          "duration_seconds": 2.0403074999994715,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "positive_examples": 12,
+            "negative_examples": 59,
+            "correct": 71,
+            "swi_prolog_version_number": 90209
+          }
+        }
+      ]
+    },
+    {
+      "label": "fixed-verification-5",
+      "environment": {
+        "python": "3.12.7",
+        "system": "Windows",
+        "machine": "AMD64",
+        "packages": {
+          "pyswip": "0.3.3+argv1",
+          "pytest": "9.1.1",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "click": "8.5.0",
+          "networkx": "3.7",
+          "tabulate": "0.10.0"
+        }
+      },
+      "source_sha256": {
+        "learning/attr_learner.py": "9f2c62f08d0348cc2b2f0da3a89b96a25d14f2ecf5fbbe3d393bdaeb4852f393",
+        "learning/rule_learner.py": "4077899473e6de6a1a1674d4d6f3cf5a82109d5c594bfe8f6f21d61d412d4031",
+        "evaluate_attributes.py": "4a6ad682608fe039d33673658f485c1a91e5d128c4822e792ad41621ecba6267",
+        "evaluate_rules.py": "201df10fbad1349983662d09a33d53e372c394eb55d6dbd93da5d994d8c303ca",
+        "tools/run_checks.py": "b6c35f98f65693c61ea580d1fe6e00cf4636f1b30616fc9b4e3c60a732c9eb7d",
+        "tools/check_environment.py": "d00755e9db29b1f5d2a06d0fab0cd1e3949c1a5be441c58f9d1b54c48a9b777c",
+        "tools/verify_release.py": "03fec2ac5c4e588517657a084d7cbffd56d9d2f9f5c56e8d33cbafdf86043e1e",
+        "requirements.lock.txt": "f0b7a074d4190bb64f56cd68362469cbbcccefaf9d20f4f342b3d517bc4efa88",
+        "setup.cfg": "14034e24d26ffd934562b14d185a86cdeb4af96a1fab74ef2ae355828d1161ef"
+      },
+      "stages": [
+        {
+          "name": "release",
+          "status": "passed",
+          "duration_seconds": 0.28401579999626847,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "schema_version": 1,
+            "passed": true,
+            "payload_files": 115,
+            "initial_source_files": 27,
+            "initial_git_commit": "aa947038f923e98ec0bf16457745d538284ef45c"
+          }
+        },
+        {
+          "name": "environment",
+          "status": "passed",
+          "duration_seconds": 0.5103903999988688,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "passed": true,
+            "checks": {
+              "python_supported": true,
+              "dependencies_installed": true,
+              "swipl_cli": true,
+              "pyswip_query": true
+            },
+            "swi_prolog_version": "9.2.9"
+          }
+        },
+        {
+          "name": "pytest",
+          "status": "passed",
+          "duration_seconds": 15.7126860999997,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "tests": 157,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 2,
+            "passed": 155
+          }
+        },
+        {
+          "name": "dtl_smoke",
+          "status": "passed",
+          "duration_seconds": 1.167077900005097,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "dtl": {
+              "correct": 4,
+              "examples": 4
+            },
+            "my-dtl": {
+              "correct": 4,
+              "examples": 4
+            }
+          }
+        },
+        {
+          "name": "foil_smoke",
+          "status": "passed",
+          "duration_seconds": 2.048817200004123,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "positive_examples": 12,
+            "negative_examples": 59,
+            "correct": 71,
+            "swi_prolog_version_number": 90209
+          }
+        }
+      ]
+    },
+    {
+      "label": "fixed-linux-verification",
+      "environment": {
+        "python": "3.12.3",
+        "system": "Linux",
+        "machine": "x86_64",
+        "packages": {
+          "pyswip": "0.3.3+argv1",
+          "pytest": "9.1.1",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "click": "8.5.0",
+          "networkx": "3.7",
+          "tabulate": "0.10.0"
+        }
+      },
+      "source_sha256": {
+        "learning/attr_learner.py": "9f2c62f08d0348cc2b2f0da3a89b96a25d14f2ecf5fbbe3d393bdaeb4852f393",
+        "learning/rule_learner.py": "4077899473e6de6a1a1674d4d6f3cf5a82109d5c594bfe8f6f21d61d412d4031",
+        "evaluate_attributes.py": "4a6ad682608fe039d33673658f485c1a91e5d128c4822e792ad41621ecba6267",
+        "evaluate_rules.py": "201df10fbad1349983662d09a33d53e372c394eb55d6dbd93da5d994d8c303ca",
+        "tools/run_checks.py": "b6c35f98f65693c61ea580d1fe6e00cf4636f1b30616fc9b4e3c60a732c9eb7d",
+        "tools/check_environment.py": "d00755e9db29b1f5d2a06d0fab0cd1e3949c1a5be441c58f9d1b54c48a9b777c",
+        "tools/verify_release.py": "03fec2ac5c4e588517657a084d7cbffd56d9d2f9f5c56e8d33cbafdf86043e1e",
+        "requirements.lock.txt": "f0b7a074d4190bb64f56cd68362469cbbcccefaf9d20f4f342b3d517bc4efa88",
+        "setup.cfg": "14034e24d26ffd934562b14d185a86cdeb4af96a1fab74ef2ae355828d1161ef"
+      },
+      "stages": [
+        {
+          "name": "release",
+          "status": "passed",
+          "duration_seconds": 0.08462062899980083,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "schema_version": 1,
+            "passed": true,
+            "payload_files": 115,
+            "initial_source_files": 27,
+            "initial_git_commit": "aa947038f923e98ec0bf16457745d538284ef45c"
+          }
+        },
+        {
+          "name": "environment",
+          "status": "passed",
+          "duration_seconds": 0.140749722999999,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "passed": true,
+            "checks": {
+              "python_supported": true,
+              "dependencies_installed": true,
+              "swipl_cli": true,
+              "pyswip_query": true
+            },
+            "swi_prolog_version": "9.0.4"
+          }
+        },
+        {
+          "name": "pytest",
+          "status": "passed",
+          "duration_seconds": 20.596184595000068,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "tests": 157,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0,
+            "passed": 157
+          }
+        },
+        {
+          "name": "dtl_smoke",
+          "status": "passed",
+          "duration_seconds": 0.7629417460000241,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "dtl": {
+              "correct": 4,
+              "examples": 4
+            },
+            "my-dtl": {
+              "correct": 4,
+              "examples": 4
+            }
+          }
+        },
+        {
+          "name": "foil_smoke",
+          "status": "passed",
+          "duration_seconds": 2.6236450480000713,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "native_failure_patterns": [],
+          "checks": {
+            "positive_examples": 12,
+            "negative_examples": 59,
+            "correct": 71,
+            "swi_prolog_version_number": 90004
+          }
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Windows and WSL use the same physical PC, not independent hardware.",
+    "Normal exits observed in these runs do not prove all possible inputs or native runtime versions are safe.",
+    "Learning algorithms, initial records and benchmark scores are unchanged.",
+    "Documentation and this receipt were added after the executable candidate was tested. The final ZIP is separately integrity-checked."
+  ]
+}

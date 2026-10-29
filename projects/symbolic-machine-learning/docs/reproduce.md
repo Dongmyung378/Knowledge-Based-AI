@@ -8,7 +8,7 @@ Run commands from `projects/symbolic-machine-learning` unless stated otherwise. 
 
 Use Python 3.12. The tested Windows native runtime is **SWI-Prolog 9.2.9 x64**; the Ubuntu 24.04 system package is **SWI-Prolog 9.0.4**. Python 3.10 or later is required by the release tools. Activate a clean environment rather than reusing an unrelated project's packages.
 
-Install Git as well: `pip` uses it to fetch the pinned PySwip source commit, including when you started from the downloadable ZIP. The generated attribute examples and graph fixtures require no separate dataset download.
+The ZIP includes `vendor/pyswip`, a pinned PySwip 0.3.3+argv1 package with the documented native argument-lifetime fix. Run `pip` from the project directory so `./vendor/pyswip` resolves correctly. Git is not needed for this dependency. If upgrading an existing environment, run the requirements installation again; the local version replaces the upstream 0.3.3 installation. The generated attribute examples and graph fixtures require no separate dataset download.
 
 ```bash
 python -m venv .venv

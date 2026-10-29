@@ -48,7 +48,7 @@ def initial_record():
                'scope': 'Initial source and records are retrieved byte-for-byte from the preserved source ZIP or the unchanged shared reference PDFs. New variants are appended after the initial DTL code.'}
     path = PROJECT / 'reports/source-preservation.json'
     path.parent.mkdir(exist_ok=True)
-    path.write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
+    path.write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8', newline='\n')
     return {'path': provenance['snapshot'], 'sha256': sha(snapshot_path.read_bytes()),
             'size_bytes': snapshot_path.stat().st_size, 'git_commit': provenance['git_commit']}
 
@@ -69,7 +69,7 @@ def build(output):
             files.append({'path': name[len(prefix):], 'sha256': sha(path.read_bytes()), 'size_bytes': path.stat().st_size})
     manifest = {'schema_version': 1, 'source_version': '1', 'files': files, 'initial_snapshot': snapshot,
                 'scope': 'Declared symbolic-learning project payloads. The source ZIP also retains the repository companion projects; the manifest does not claim to validate their optional runtimes.'}
-    manifest_path.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+    manifest_path.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8', newline='\n')
     from verify_release import verify_directory, verify_archive
     verified = verify_directory(PROJECT, 'release-manifest.json')
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -82,7 +82,7 @@ def build(output):
             archive.writestr(info, (REPO / name).read_bytes(), compresslevel=9)
     checked_zip = verify_archive(output, None, 'release-manifest.json')
     archive_hash = sha(output.read_bytes())
-    output.with_suffix('.sha256').write_text(f'{archive_hash}  {output.name}\n', encoding='ascii')
+    output.with_suffix('.sha256').write_text(f'{archive_hash}  {output.name}\n', encoding='ascii', newline='\n')
     print(json.dumps({'status': 'passed', 'payload_files': verified['payload_files'],
                       'archive_bytes': output.stat().st_size, 'archive_sha256': archive_hash,
                       'archive_prefix': checked_zip['archive_prefix']}))

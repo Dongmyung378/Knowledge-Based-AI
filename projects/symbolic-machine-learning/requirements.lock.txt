@@ -1,5 +1,5 @@
 # Verified Python 3.12 runtime. SWI-Prolog 9.2.9 is a separate native prerequisite.
-git+https://github.com/yuce/pyswip@c07e8083c6a58eb7de99bb26c8dc89a0c215f52c#egg=pyswip
+./vendor/pyswip
 pytest==9.1.1
 numpy==2.5.3
 scipy==1.18.1

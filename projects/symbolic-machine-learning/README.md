@@ -43,7 +43,7 @@ The original coursework supplied the code skeleton, dataset generation utilities
 
 ## Quick start
 
-Use Python 3.12 with **SWI-Prolog 9.2.9 x64 on Windows** or the **9.0.4 system package on Ubuntu 24.04**. SWI-Prolog must be discoverable by PySwip; it is not installed by `pip`. Git is required to install the pinned PySwip source dependency. The [reproduction guide](docs/reproduce.md) links the exact Windows installer and its hash.
+Use Python 3.12 with **SWI-Prolog 9.2.9 x64 on Windows** or the **9.0.4 system package on Ubuntu 24.04**. SWI-Prolog must be discoverable by PySwip; it is not installed by `pip`. The source ZIP includes a pinned PySwip package with a native argument-lifetime fix; Git is not required to install it. The [reproduction guide](docs/reproduce.md) links the exact Windows installer and its hash.
 
 ```bash
 cd projects/symbolic-machine-learning
@@ -57,7 +57,7 @@ python -m pip install -r requirements.lock.txt
 python tools/run_checks.py --output-dir outputs/verification
 ```
 
-The lock file pins PySwip to commit `c07e8083c6a58eb7de99bb26c8dc89a0c215f52c` and records the resolved Python dependency versions. The environment checker executes an actual isolated Prolog query and returns a nonzero status with hints if the native runtime cannot load. See [installation and reproduction](docs/reproduce.md) for Linux and Windows discovery details.
+The lock file installs local PySwip **0.3.3+argv1**, based on commit `c07e8083c6a58eb7de99bb26c8dc89a0c215f52c`, and records the resolved Python dependency versions. The [documented patch](vendor/pyswip/PATCH.md) keeps initialization arguments alive until normal native shutdown; the learning algorithms and recorded benchmark values are unchanged. The environment checker executes an actual isolated Prolog query and returns a nonzero status with hints if the native runtime cannot load. See [installation and reproduction](docs/reproduce.md) for Linux and Windows discovery details.
 
 The guarded check command verifies the release, diagnoses the environment, runs pytest and both fixed learning smoke workflows, and checks native process shutdown. Choose a new or empty output directory; existing evidence is not overwritten.
 

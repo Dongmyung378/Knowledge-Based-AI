@@ -1,0 +1,79 @@
+{
+  "repository": "https://github.com/yuce/pyswip",
+  "commit": "c07e8083c6a58eb7de99bb26c8dc89a0c215f52c",
+  "local_version": "0.3.3+argv1",
+  "modified_files": [
+    "src/pyswip/core.py",
+    "pyproject.toml"
+  ],
+  "files": [
+    {
+      "path": "CONTRIBUTORS.txt",
+      "upstream_sha256": "3f783557cd025196813168af6fa5bcb4961c46d07a79082117966e0097c1e5c0"
+    },
+    {
+      "path": "LICENSE",
+      "upstream_sha256": "844d4b8f22ce8b9a4868b1fae53eed3f162633d27b36f28ca5af7de75f884cc8"
+    },
+    {
+      "path": "README.md",
+      "upstream_sha256": "6b9cba42284e4f59e7922028132aa5871213f9752c81bcdbfa50cd773815c80b"
+    },
+    {
+      "path": "pyproject.toml",
+      "upstream_sha256": "d20138307bf3dca21b0a6b53b59efca7de8c90dae3f3530e53c08090f3bf6591"
+    },
+    {
+      "path": "src/pyswip/__init__.py",
+      "upstream_sha256": "aef4b78ae04e418892dcf78f2e8f9ef5554b5b6a8499a47912580e65db1ddf08"
+    },
+    {
+      "path": "src/pyswip/core.py",
+      "upstream_sha256": "18c40eda20ca442cce652a08dc849637f3b734ab3207f3afd98093ad63e3c660"
+    },
+    {
+      "path": "src/pyswip/easy.py",
+      "upstream_sha256": "94193b817148b89b63c8247d24af9e0bfc1cb3b5b62ecd818fbaeefbeb3200b1"
+    },
+    {
+      "path": "src/pyswip/examples/__init__.py",
+      "upstream_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "src/pyswip/examples/coins.pl",
+      "upstream_sha256": "e23e7cbb4aa33cb54e294a9ab8b8cdc78536d3e4ffc21b588014a1ab82e984bf"
+    },
+    {
+      "path": "src/pyswip/examples/coins.py",
+      "upstream_sha256": "c0054769d23d11d1b2a537a1cb981226adc0a05024ffc64a9839d440e125c488"
+    },
+    {
+      "path": "src/pyswip/examples/hanoi.pl",
+      "upstream_sha256": "467b23bd67a833e2dd9902dfd485b0f6f86aade469f944b7239a3ba6f5e43188"
+    },
+    {
+      "path": "src/pyswip/examples/hanoi.py",
+      "upstream_sha256": "df14e204f88e67bcf037196b97dea9789aa2f7f6870da230d83fa80a5df77dd8"
+    },
+    {
+      "path": "src/pyswip/examples/sudoku.pl",
+      "upstream_sha256": "1400848910b25b42446ba29e97b76da66b098484d1523f65f2b9990d86a78121"
+    },
+    {
+      "path": "src/pyswip/examples/sudoku.py",
+      "upstream_sha256": "3886cfcf5a671b96aa10eb7eaf58dac0243df937b583501821a214e466d390f7"
+    },
+    {
+      "path": "src/pyswip/prolog.py",
+      "upstream_sha256": "ec99aa15c44f7daef24d23d8cb72a56b40982c2da04987260f2b2cbf04a2f5d5"
+    },
+    {
+      "path": "src/pyswip/py.typed",
+      "upstream_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "src/pyswip/utils.py",
+      "upstream_sha256": "95ab57dae5dde9cab082b34081cdce881c55e72776d5745298fd39d2d8b50fc8"
+    }
+  ]
+}

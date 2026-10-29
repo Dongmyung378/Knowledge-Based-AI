@@ -43,7 +43,7 @@
 
 ## 빠른 시작
 
-Python 3.12와 함께 **Windows에서는 SWI-Prolog 9.2.9 x64**, **Ubuntu 24.04에서는 시스템 패키지 9.0.4**를 사용합니다. PySwip이 SWI-Prolog를 찾을 수 있어야 하며 `pip`만으로 Prolog 런타임이 설치되지는 않습니다. 고정한 PySwip 소스 의존성 설치에는 Git이 필요합니다. [재현 문서](docs/reproduce.ko.md)에 정확한 Windows 설치 파일과 해시를 안내합니다.
+Python 3.12와 함께 **Windows에서는 SWI-Prolog 9.2.9 x64**, **Ubuntu 24.04에서는 시스템 패키지 9.0.4**를 사용합니다. PySwip이 SWI-Prolog를 찾을 수 있어야 하며 `pip`만으로 Prolog 런타임이 설치되지는 않습니다. ZIP에 네이티브 초기화 인자의 메모리 수명을 수정한 고정 PySwip 패키지를 포함하므로 설치에 Git은 필요하지 않습니다. [재현 문서](docs/reproduce.ko.md)에 정확한 Windows 설치 파일과 해시를 안내합니다.
 
 ```bash
 cd projects/symbolic-machine-learning
@@ -57,7 +57,7 @@ python -m pip install -r requirements.lock.txt
 python tools/run_checks.py --output-dir outputs/verification
 ```
 
-고정 목록은 PySwip 커밋 `c07e8083c6a58eb7de99bb26c8dc89a0c215f52c`과 설치한 Python 의존성 버전을 지정합니다. 환경 진단은 별도 프로세스에서 실제 Prolog 질의를 수행하고, 런타임을 불러오지 못하면 원인에 맞는 안내와 함께 실패 코드를 반환합니다. Linux와 Windows의 런타임 연결은 [설치와 재현](docs/reproduce.ko.md)을 참고하세요.
+고정 목록은 PySwip 커밋 `c07e8083c6a58eb7de99bb26c8dc89a0c215f52c`에 기반한 로컬 패키지 **0.3.3+argv1**과 Python 의존성 버전을 지정합니다. [호환성 수정](vendor/pyswip/PATCH.ko.md)은 정상 네이티브 종료까지 초기화 인자의 메모리를 유지합니다. 학습 알고리즘과 기존 벤치마크 수치는 바꾸지 않았습니다. 환경 진단은 별도 프로세스에서 실제 Prolog 질의를 수행하고, 런타임을 불러오지 못하면 원인에 맞는 안내와 함께 실패 코드를 반환합니다. Linux와 Windows의 런타임 연결은 [설치와 재현](docs/reproduce.ko.md)을 참고하세요.
 
 통합 검증 명령은 배포 파일과 환경을 확인하고 pytest 및 두 학습 경로의 고정 예제를 실행하며 네이티브 프로세스 종료도 검사합니다. 출력은 새 폴더 또는 빈 폴더로 지정하며 기존 근거를 덮어쓰지 않습니다.
 

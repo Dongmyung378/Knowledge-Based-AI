@@ -88,6 +88,8 @@ Windows PowerShell에서는 `.\.venv\Scripts\Activate.ps1`로 활성화합니다
 
 2026-10-05의 초기 기본 검증 30개 통과는 과거 기록으로 유지합니다. 개선 배포본은 실제 소스 ZIP을 풀어 같은 PC의 새 환경에서 확인했습니다. Windows는 151개 통과와 권한 관련 심볼릭 링크 2개 건너뜀, WSL의 Linux 환경은 153개 모두 통과했습니다. 두 환경에서 실제 Prolog 질의와 네이티브 프로세스 종료를 포함한 통합 다섯 단계가 모두 통과했습니다. [실행 환경과 검증 근거](projects/symbolic-machine-learning/docs/validation.ko.md)를 참고하세요. Vampire는 별도의 자동 추론 경로에만 필요합니다.
 
+현재 소스 ZIP에는 초기화 인자의 메모리 수명을 수정한 PySwip **0.3.3+argv1**을 포함합니다. 후속 새 환경 검사에서 원본 연결 라이브러리의 간헐적 종료 오류가 확인되어, 이전 성공 기록은 당시 실행의 근거로 보존합니다. [현재 검증 기록](projects/symbolic-machine-learning/docs/validation.ko.md)에서 수정과 재검증 내용을 확인할 수 있습니다.
+
 ## 문서
 
 모든 Markdown 문서는 영어를 기본으로 하며 한국어 대응 문서로 이동할 수 있습니다. 세부 구현은 각 프로젝트 README에서 확인할 수 있습니다. 기호 학습의 [구조](projects/symbolic-machine-learning/docs/architecture.ko.md)와 [재현 문서](projects/symbolic-machine-learning/docs/reproduce.ko.md)는 개선한 실행 경로를 설명하며 [초기 실험 보고서](projects/symbolic-machine-learning/docs/experiment-report.ko.md)는 과거 기록으로 보존합니다.
